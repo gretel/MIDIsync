@@ -1,7 +1,3 @@
-#include <digitalWriteFast.h>
-#include <Button.h>
-#include <LED.h>
-
 /*
 --------------------------------------------------------------------------------------------------
  MIDI Master Clock Generator
@@ -9,6 +5,14 @@
  inspired by Gijs Gieskes 2009 http://gieskes.nl
  --------------------------------------------------------------------------------------------------
  */
+
+// Carlyn Maw
+#include <Button.h>
+// http://code.google.com/p/digitalwritefast/
+#include <digitalWriteFast.h>
+// Alexander Brevig
+#include <LED.h>
+
 static const int STATUS_SYNC                  = 0xF8;
 static const int STATUS_START                 = 0xFA;
 static const int STATUS_CONTINUE              = 0xFB;
@@ -21,8 +25,10 @@ static const int STATUS_RESET                 = 0xFF;
 #define LED_CLOCK 6
 
 boolean enabled = false;
-boolean toggleFlag = false;
+boolean prevEnabled = false;
 boolean ledFlag = LOW;
+boolean prevLedFlag = LOW;
+
 unsigned long time = 0;
 unsigned long analogValueA = 0;
 unsigned int ledCounter = 0;
@@ -31,7 +37,7 @@ byte data1;
 byte data2;
 LED boardLED = LED(LED_BOARD);
 LED clockLED = LED(LED_CLOCK);
-Button button = Button(BUTTON_TOGGLE, BUTTON_PULLUP);
+Button button = Button(BUTTON_TOGGLE, HIGH);
 
 //http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1208715493/11
 #define FASTADC 1
@@ -53,10 +59,13 @@ void setup(){
   cbi(ADCSRA,ADPS0);
 #endif
 
+  pinMode(LED_BOARD, OUTPUT);
+  pinMode(LED_CLOCK, OUTPUT);
   pinMode(BUTTON_TOGGLE, INPUT);
-  digitalWrite(BUTTON_TOGGLE, HIGH); 
 
-  boardLED.blink(75,6);
+  //button.setDebounceDelay(50);
+  //boardLED.blink(50,3);
+  clockLED.fadeIn(150);
 
   // midi rate
   Serial.begin(31250);
@@ -68,12 +77,14 @@ void setup(){
     Serial.write(STATUS_RESET);
     delay(250);
   }
+
+  clockLED.fadeOut(150);
 }
 
 void loop(){
   if(Serial.available() > 0)
   {
-    // TODO simplify (no vars)
+    // TODO non-blocking buffer
     cmd = Serial.read();
     data1 = Serial.read();
     data2 = Serial.read();
@@ -83,51 +94,53 @@ void loop(){
     Serial.write(data2);
   }
 
-  if(button.isPressed()){
-    enabled = !enabled;
+  button.listen();
 
-    if(enabled){
+  if(button.onPressAsToggle()){
+    enabled = !enabled;
+  }
+
+  // compare to previous state
+  if(prevEnabled != enabled){
+    // copy
+    prevEnabled = enabled;
+
+    if(enabled)
+    {
       Serial.write(STATUS_START);
-    }
+    } 
     else{
       Serial.write(STATUS_STOP);
-      if(ledFlag)
-      {
-        clockLED.fadeOutTo(150, 64);
-      }
+      digitalWriteFast(LED_CLOCK, LOW);
     }
   }
-  else
+
+  if(enabled)
   {
     // map(value, fromLow, fromHigh, toLow, toHigh)
-    analogValueA = map(analogRead(POT), 0, 1023, 128, 20000);  // delay settings
+    analogValueA = map(analogRead(POT), 0, 1023, 20, 100000);  // delay settings
 
     if(micros() - time > analogValueA){
       time = micros();
 
-      if(enabled){
-        // midi clock
-        Serial.write(STATUS_SYNC);
+      // midi clock
+      Serial.write(STATUS_SYNC);
 
-        ledCounter++;
-        if(ledCounter > 3){
-          ledCounter = 0;
-          // toggle
-          ledFlag = !ledFlag;
-        }
+      ledCounter++;
+      if(ledCounter > 3){
+        ledCounter = 0;
+        // toggle
+        ledFlag = !ledFlag;
+      }
 
-        if(ledFlag){
-          digitalWriteFast(LED_CLOCK, LOW);
-        }
-        else
-        {
-          digitalWriteFast(LED_CLOCK, HIGH);
-        }
+      // compare to previous state
+      if(prevLedFlag != ledFlag){
+        // copy
+        prevLedFlag = ledFlag;
+        digitalWriteFast(LED_CLOCK, ledFlag);
       }
     }
   }
-
 }
 
-
-
+// end
