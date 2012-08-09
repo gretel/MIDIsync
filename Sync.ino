@@ -13,25 +13,27 @@
 // Alexander Brevig
 #include <LED.h>
 
-static const int STATUS_SYNC                  = 0xF8;
-static const int STATUS_START                 = 0xFA;
-static const int STATUS_CONTINUE              = 0xFB;
-static const int STATUS_STOP                  = 0xFC;
-static const int STATUS_RESET                 = 0xFF;
-
+// pins
 #define POT 0
 #define BUTTON_TOGGLE  2
 #define LED_BOARD  13
 #define LED_CLOCK 6
 
+// static
+static const int STATUS_SYNC     = 0xF8;
+static const int STATUS_START    = 0xFA;
+static const int STATUS_CONTINUE = 0xFB;
+static const int STATUS_STOP     = 0xFC;
+static const int STATUS_RESET    = 0xFF;
+
+// var
+unsigned long time = 0;
+unsigned long analogValueA = 0;
+unsigned int ledCounter = 0;
 boolean enabled = false;
 boolean prevEnabled = false;
 boolean ledFlag = LOW;
 boolean prevLedFlag = LOW;
-
-unsigned long time = 0;
-unsigned long analogValueA = 0;
-unsigned int ledCounter = 0;
 byte cmd;
 byte data1;
 byte data2;
@@ -65,6 +67,8 @@ void setup(){
 
   //button.setDebounceDelay(50);
   //boardLED.blink(50,3);
+
+  // decoration
   clockLED.fadeIn(150);
 
   // midi rate
@@ -72,12 +76,15 @@ void setup(){
 
   if(button.isPressed())
   {
+    // send stop first..
     Serial.write(STATUS_STOP);
     delay(250);
+    // then reset
     Serial.write(STATUS_RESET);
     delay(250);
   }
 
+  // decoration
   clockLED.fadeOut(150);
 }
 
@@ -96,7 +103,9 @@ void loop(){
 
   button.listen();
 
+  // detect button press
   if(button.onPressAsToggle()){
+    // toggle
     enabled = !enabled;
   }
 
@@ -107,10 +116,13 @@ void loop(){
 
     if(enabled)
     {
+      // send start command
       Serial.write(STATUS_START);
     } 
     else{
+      // send stop command
       Serial.write(STATUS_STOP);
+      // ensure darkness
       digitalWriteFast(LED_CLOCK, LOW);
     }
   }
@@ -121,13 +133,17 @@ void loop(){
     analogValueA = map(analogRead(POT), 0, 1023, 20, 100000);  // delay settings
 
     if(micros() - time > analogValueA){
+      // copy
       time = micros();
 
       // midi clock
       Serial.write(STATUS_SYNC);
 
+      // increment
       ledCounter++;
+      // compare
       if(ledCounter > 3){
+        // reset
         ledCounter = 0;
         // toggle
         ledFlag = !ledFlag;
@@ -137,6 +153,7 @@ void loop(){
       if(prevLedFlag != ledFlag){
         // copy
         prevLedFlag = ledFlag;
+        // set output
         digitalWriteFast(LED_CLOCK, ledFlag);
       }
     }
