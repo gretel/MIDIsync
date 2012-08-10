@@ -6,12 +6,8 @@
  --------------------------------------------------------------------------------------------------
  */
 
-// Carlyn Maw
-#include <Button.h>
 // http://code.google.com/p/digitalwritefast/
 #include <digitalWriteFast.h>
-// Alexander Brevig
-#include <LED.h>
 
 // pins
 #define POT 0
@@ -37,9 +33,14 @@ boolean prevLedFlag = LOW;
 byte cmd;
 byte data1;
 byte data2;
-LED boardLED = LED(LED_BOARD);
-LED clockLED = LED(LED_CLOCK);
-Button button = Button(BUTTON_TOGGLE, HIGH);
+int buttonState;   // the previous reading from the input pin
+int lastButtonState = LOW;   // the previous reading from the input pin
+long lastDebounceTime = 0;  // the last time the output pin was toggled
+long debounceDelay = 50;    // the debounce time; increase if the output flickers
+
+//LED boardLED = LED(LED_BOARD);
+//LED clockLED = LED(LED_CLOCK);
+//Button button = Button(BUTTON_TOGGLE, HIGH);
 
 //http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1208715493/11
 #define FASTADC 1
@@ -65,27 +66,26 @@ void setup(){
   pinMode(LED_CLOCK, OUTPUT);
   pinMode(BUTTON_TOGGLE, INPUT);
 
-  //button.setDebounceDelay(50);
+  //button.setDebounceDelay(60);
   //boardLED.blink(50,3);
 
   // decoration
-  clockLED.fadeIn(150);
+  digitalWriteFast(LED_CLOCK, HIGH);
+  delay(250);
+  digitalWriteFast(LED_CLOCK, LOW);
 
   // midi rate
   Serial.begin(31250);
 
-  if(button.isPressed())
-  {
-    // send stop first..
-    Serial.write(STATUS_STOP);
-    delay(250);
-    // then reset
-    Serial.write(STATUS_RESET);
-    delay(250);
-  }
-
-  // decoration
-  clockLED.fadeOut(150);
+  //  if(button.isPressed())
+  //  {
+  //    // send stop first..
+  //    Serial.write(STATUS_STOP);
+  //    delay(250);
+  //    // then reset
+  //    Serial.write(STATUS_RESET);
+  //    delay(250);
+  //  }
 }
 
 void loop(){
@@ -99,13 +99,26 @@ void loop(){
     Serial.write(cmd);
     Serial.write(data1);
     Serial.write(data2);
+
+    digitalWriteFast(LED_BOARD, HIGH);
+  }
+  else
+  {      
+    digitalWriteFast(LED_BOARD, LOW);
   }
 
-  button.listen();
+  int reading = digitalRead(BUTTON_TOGGLE);
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  } 
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    buttonState = reading;
+  }
+  // copy
+  lastButtonState = reading;
 
-  // detect button press
-  if(button.onPressAsToggle()){
-    // toggle
+  if(buttonState)
+  {
     enabled = !enabled;
   }
 
@@ -118,19 +131,23 @@ void loop(){
     {
       // send start command
       Serial.write(STATUS_START);
+      // ensure darkness
+      digitalWriteFast(LED_CLOCK, HIGH);
     } 
     else{
       // send stop command
       Serial.write(STATUS_STOP);
       // ensure darkness
       digitalWriteFast(LED_CLOCK, LOW);
+      ledFlag = LOW;
+      delay(50);
     }
   }
 
   if(enabled)
   {
     // map(value, fromLow, fromHigh, toLow, toHigh)
-    analogValueA = map(analogRead(POT), 0, 1023, 20, 100000);  // delay settings
+    analogValueA = map(analogRead(POT), 0, 1023, 10, 100000);  // delay settings
 
     if(micros() - time > analogValueA){
       // copy
