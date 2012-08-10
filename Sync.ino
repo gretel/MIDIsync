@@ -66,9 +66,6 @@ void setup(){
   pinMode(LED_CLOCK, OUTPUT);
   pinMode(BUTTON_TOGGLE, INPUT);
 
-  //button.setDebounceDelay(60);
-  //boardLED.blink(50,3);
-
   // decoration
   digitalWriteFast(LED_CLOCK, HIGH);
   delay(250);
@@ -76,16 +73,6 @@ void setup(){
 
   // midi rate
   Serial.begin(31250);
-
-  //  if(button.isPressed())
-  //  {
-  //    // send stop first..
-  //    Serial.write(STATUS_STOP);
-  //    delay(250);
-  //    // then reset
-  //    Serial.write(STATUS_RESET);
-  //    delay(250);
-  //  }
 }
 
 void loop(){
@@ -99,15 +86,10 @@ void loop(){
     Serial.write(cmd);
     Serial.write(data1);
     Serial.write(data2);
-
-    digitalWriteFast(LED_BOARD, HIGH);
-  }
-  else
-  {      
-    digitalWriteFast(LED_BOARD, LOW);
   }
 
   int reading = digitalRead(BUTTON_TOGGLE);
+
   if (reading != lastButtonState) {
     lastDebounceTime = millis();
   } 
