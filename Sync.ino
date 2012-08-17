@@ -31,16 +31,10 @@ static const unsigned int BUTTON_HOLD     = 2;
 
 // var
 unsigned long time = 0;
-unsigned long currentMillis = 0;
-unsigned long previousMillis = 0;
 unsigned long analogValueA = 0;
-unsigned int counter = 0;
-unsigned int ledCounter = 0;
 unsigned int currentState;
 unsigned int nextState;
 unsigned int buttonState;
-boolean ledFlag = LOW;
-boolean prevLedFlag = LOW;
 byte cmd;
 byte data1;
 byte data2;
@@ -89,6 +83,11 @@ void setup(){
   digitalWriteFast(LED_CLOCK, HIGH);
   delay(100);
   digitalWriteFast(LED_CLOCK, LOW);
+  delay(50);
+  digitalWriteFast(LED_CLOCK, HIGH);
+  delay(100);
+  digitalWriteFast(LED_CLOCK, LOW);
+  delay(50);
 
   // midi rate
   Serial.begin(31250);
@@ -219,10 +218,6 @@ void loop()
       Serial.write(STATUS_STOP);
       // ensure darkness
       digitalWriteFast(LED_CLOCK, LOW);
-      // reset
-      counter = 0;
-      // reset flag
-      ledFlag = LOW;
     }
     else // failsafe
     {  
@@ -236,37 +231,21 @@ void loop()
     // map(value, fromLow, fromHigh, toLow, toHigh)
     analogValueA = map(analogRead(POT), 0, 1023, 7500, 200000);  // delay settings
 
-    if(micros() - time > analogValueA){
-      // copy
-      time = micros();
-
-      // increment beat counter
-      counter++;
-
+    if(micros() - time > analogValueA)
+    {
       // midi clock
       Serial.write(STATUS_SYNC);
-/*
-      // debug
-       syncSerial.print("SYNC:");
-       syncSerial.println(analogValueA);
-*/
-      // increment
-      ledCounter++;
-      // compare
-      if(ledCounter > 3){
-        // reset
-        ledCounter = 0;
-        // toggle
-        ledFlag = !ledFlag;
-      }
 
-      // compare to previous state
-      if(prevLedFlag != ledFlag){
-        // compare
-        prevLedFlag = ledFlag;
-        // toggle outpit pin
-        digitalWriteFast(LED_CLOCK, ledFlag);
-      }
+      // copy
+      time = micros();
+      digitalWriteFast(LED_CLOCK, HIGH);
+
+      // debug
+      syncSerial.println("SYNC");
+    }
+    else
+    {
+      digitalWriteFast(LED_CLOCK, LOW);
     }
   }
 }
@@ -281,3 +260,8 @@ void setNextState(unsigned int state)
 }
 
 // end
+
+
+
+
+
