@@ -11,13 +11,12 @@
  --------------------------------------------------------------------------------------------------
  */
 
-// pins
 #define POT 0
 #define BUTTON_TOGGLE 2
 #define LED_BOARD 13
 #define LED_CLOCK 6
-#define SERIAL_RX 11
-#define SERIAL_TX 12
+#define SERIAL_RX 7
+#define SERIAL_TX 8
 
 // static
 static const unsigned int STATUS_SYNC     = 0xF8;
@@ -38,7 +37,7 @@ unsigned int buttonState;
 byte cmd;
 byte data1;
 byte data2;
-Button toggleButton = Button(BUTTON_TOGGLE, LOW);
+Button toggleButton = Button(BUTTON_TOGGLE, HIGH);
 SoftwareSerial syncSerial(SERIAL_RX, SERIAL_TX); // RX, TX
 
 //http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1208715493/11
@@ -60,34 +59,33 @@ void setup(){
   cbi(ADCSRA,ADPS0);
 #endif
 
-  // software serial
-  pinMode(SERIAL_RX, INPUT);
-  pinMode(SERIAL_TX, OUTPUT);
-  syncSerial.begin(19200);
-  syncSerial.println("SETUP");
-
   // pin configuration
   pinMode(LED_BOARD, OUTPUT);
   pinMode(LED_CLOCK, OUTPUT);
+  pinMode(SERIAL_RX, INPUT);
+  pinMode(SERIAL_TX, OUTPUT);
   pinMode(BUTTON_TOGGLE, INPUT);
+
+  syncSerial.begin(19200);
+  syncSerial.println("SETUP");
 
   // button library
   toggleButton.setDebounceDelay(50);
   toggleButton.setHoldDelay(500);
 
   // decoration
-  digitalWriteFast(LED_CLOCK, HIGH);
+  digitalWrite(LED_CLOCK, HIGH);
+  digitalWrite(LED_BOARD, LOW);
   delay(100);
-  digitalWriteFast(LED_CLOCK, LOW);
-  delay(50);
-  digitalWriteFast(LED_CLOCK, HIGH);
+  digitalWrite(LED_CLOCK, LOW);
+  digitalWrite(LED_BOARD, HIGH);
+  delay(33);
+  digitalWrite(LED_CLOCK, HIGH);
+  digitalWrite(LED_BOARD, LOW);
   delay(100);
-  digitalWriteFast(LED_CLOCK, LOW);
-  delay(50);
-  digitalWriteFast(LED_CLOCK, HIGH);
-  delay(100);
-  digitalWriteFast(LED_CLOCK, LOW);
-  delay(50);
+  digitalWrite(LED_CLOCK, LOW);
+  digitalWrite(LED_BOARD, HIGH);
+  delay(33);
 
   // midi rate
   Serial.begin(31250);
@@ -109,7 +107,7 @@ void loop()
 
     // debug
     syncSerial.print("IN:");
-    syncSerial.print(cmd);
+    syncSerial.println(cmd);
 
     // check for commands we will obey
     if (cmd == STATUS_STOP || cmd == STATUS_START || cmd == STATUS_CONTINUE)
@@ -229,7 +227,7 @@ void loop()
   if(currentState == STATUS_START || currentState == STATUS_CONTINUE)
   {
     // map(value, fromLow, fromHigh, toLow, toHigh)
-    analogValueA = map(analogRead(POT), 0, 1023, 7500, 200000);  // delay settings
+    analogValueA = map(analogRead(POT), 0, 1023, 10000, 200000);  // delay settings
 
     if(micros() - time > analogValueA)
     {
@@ -256,12 +254,7 @@ void setNextState(unsigned int state)
   nextState = state;
   // DEBUG
   //syncSerial.print("SET_NEXT_STATE:");
-  //syncSerial.println(state);
+  //debugPrintstate);
 }
 
 // end
-
-
-
-
-
