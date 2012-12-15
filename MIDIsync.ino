@@ -1,13 +1,17 @@
 /*--------------------------------------------------------------------------------------------------
- HENSEL MODEL01 - MIDI/CV MASTER CLOCK
+ "HENSEL MODEL01"
+ Arduino "MIDIsync" - MIDI Master Clock Generator
+ https://github.com/gretel/MIDIsync
  ɔ 2012 Tom Hensel <tom@interpol8.net> Hamburg, Germany
  CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
  --------------------------------------------------------------------------------------------------*/
 
+// id
 #define ID "MIDI_MASTER_CLOCK"
-#define VERSION 2611120
+#define VERSION 15122012
 #define DEBUG 1
 
+// includes
 #include <avr/eeprom.h>
 #include <avr/pgmspace.h>
 #include <avr/power.h>
@@ -48,13 +52,14 @@
 #define DEBUG_INTERVAL 333
 #endif
 
+// states
 #define CLOCK_INTERNAL 1
 #define CLOCK_EXTERNAL 2
 #define CLOCK_SYNC     3
 //#define CLOCK_SKEW     4
 
+// timing
 #define CLOCK_DETECTION_WINDOW 600000
-
 #define HOLD_THRESH 500
 
 struct config_t
@@ -66,40 +71,34 @@ struct config_t
 } config;
 
 // static
-// TODO defines
 const uint8_t STATUS_SYNC     = 0xF8;
 const uint8_t STATUS_START    = 0xFA;
 const uint8_t STATUS_CONTINUE = 0xFB;
 const uint8_t STATUS_STOP     = 0xFC;
 
-// there are 1,000 microseconds in a millisecond and 1,000,000 microseconds in a second.
-
 // var
-uint8_t mode;
+uint8_t mode; // TODO struct
 uint8_t intState; // TODO struct
 uint8_t nextIntState; // TODO struct
 uint8_t extState; // TODO struct
-//uint8_t everStarted;
 uint32_t cycleTime;
 uint32_t cycleTimeExt;
-
 uint8_t colorRight;
 uint8_t colorLeft;
 register uint32_t intTime asm("r2");
 register uint32_t extTime asm("r6");
 register uint8_t cpqnInt asm("r10");
 register uint8_t cpqnExt asm("r11");
-//uint32_t cycleTimeSkew;
 
 movingAvg tapTimeFilter;
 movingAvg cycleTimeExtFilter;
-Button stateButton = Button(BTN_STATE, BUTTON_PULLDOWN, true, 50); // TODO debounce?
-Button tempoButton = Button(BTN_ENCODER, BUTTON_PULLDOWN, true, 10); // TODO debounce?
+Button stateButton = Button(BTN_STATE, BUTTON_PULLDOWN, true, 50);
+Button tempoButton = Button(BTN_ENCODER, BUTTON_PULLDOWN, true, 50);
 BiColorLED ledLeft = BiColorLED(LED_A, LED_B);
 BiColorLED ledRight = BiColorLED(LED_C, LED_D);
 
 #if DEBUG
-SoftwareSerial debugSerial(DEBUG_RX, DEBUG_TX); // RX, TX
+SoftwareSerial debugSerial(DEBUG_RX, DEBUG_TX);
 movingAvg profilingFilter;
 uint32_t debugTime;
 uint32_t loopCycle;
@@ -109,12 +108,11 @@ void printDiag()
     const uint16_t duration = micros() - loopCycle;
     const uint16_t average = profilingFilter.reading(duration);
 
-    // TODO format
     debugSerial << " COUNT: " << micros()
-                << " LOOP: " << duration // TODO
+                << " LOOP: " << duration
                 << " AVG: " << average
                 << " MODE: " << mode
-                << " CYLC_I: " << cycleTime // TODO
+                << " CYLC_I: " << cycleTime
                 << " CYLC_E: " << cycleTimeExt
                 << " STATE_I: " << intState
                 << " STATE_E: " << extState
@@ -141,7 +139,6 @@ void resetConfig()
 
     // write to non-volatile memory
     EEPROM_writeAnything(0, config);
-
     do
     {
         delay(100);
@@ -159,10 +156,10 @@ int8_t readEncoder()
     static int8_t enc_states[] =
     {
         0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0
-    }; // TODO progmem
+    }; // TODO use PROGMEM
     static uint8_t old_AB = 0;
-    old_AB <<= 2;                   //remember previous state
-    old_AB |= (ENC_PORT & 0x03);  //add current state
+    old_AB <<= 2; // remember previous state
+    old_AB |= (ENC_PORT & 0x03); // add current state
     return (enc_states[(old_AB & 0x0f)]);
 }
 
@@ -193,6 +190,7 @@ void onStateClick(Button &b)
 #if DEBUG
         debugSerial << "CONFIG:WRITE:" << config.state << " " << config.cpqn << " " << config.cycle << endl;
 #endif
+
         // write to non-volatile memory
         EEPROM_writeAnything(0, config);
 
@@ -221,11 +219,7 @@ void onStateClick(Button &b)
             nextIntState = STATUS_STOP;
             break;
         case STATUS_STOP:
-            //            // paused, continue
-            //            if (everStarted)
             nextIntState = STATUS_CONTINUE; // TODO
-            //            else
-            //                nextIntState = STATUS_START;
             break;
         }
     }
@@ -233,7 +227,8 @@ void onStateClick(Button &b)
 
 void onTempoClick(Button &b)
 {
-    /* // TODO midi panic
+    /*
+    // TODO midi panic
     if (stateButton.holdTime() > 1500)
     {
         ledLeft.notify(BICOLOR_RED, 1500, true);
@@ -398,7 +393,6 @@ setup()
     digitalWriteFast(BOARD_LED, LOW);
 }
 
-// TODO
 extern void __attribute__((noreturn))
 loop()
 {
@@ -603,7 +597,6 @@ loop()
     // compare
     if (intState != nextIntState)
     {
-
         switch (nextIntState)
         {
         case STATUS_STOP:
@@ -625,7 +618,6 @@ loop()
 #endif
         // store state (for comparison on next round)
         intState = nextIntState;
-
         ledRight.setColor(colorRight);
     }
 
