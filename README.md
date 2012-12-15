@@ -1,14 +1,15 @@
-Arduino "MIDIsync"
+Arduino "MIDIsync" - MIDI Master Clock Generator
 =
-ATMEGA328P based MIDI Master Clock Generator
-=
+Working and tested on
+- Arduino Duemilanove http://arduino.cc/en/Main/arduinoBoardDuemilanove
+- Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno
 
 So far, only the source code is available.
 Schematics and stuff are work in progress. Please stand by.
 Pre-built devices are available upon request!
 Please contact me at Tom Hensel <tom@interpol8.net>
 
-A pre-built device ("Hensel Model-01") has the following features:
+A pre-built device (nicknamed "Hensel Model-01") has the following features:
 
 	- High-precision Master Clock
 		- MIDI Clock Output
@@ -29,4 +30,4 @@ A pre-built device ("Hensel Model-01") has the following features:
 		- Low-power design, runs on batteries and USB-power (adapter required)
 		- Energy-efficient power supply included
 
-Libraries are missing. Going to add them ASAP.
+Libraries are missing. Going to add them ASAP. Thanks.
