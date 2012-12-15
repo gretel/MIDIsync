@@ -16,6 +16,8 @@
 #include <avr/pgmspace.h>
 #include <avr/power.h>
 #include "Arduino.h"
+
+// 3rd party includes
 #include <digitalWriteFast.h>
 #include <Streaming.h>
 #include <EEPROM.h>
@@ -28,6 +30,10 @@
 
 #if DEBUG
 #include <SoftwareSerial.h>
+#define DEBUG_RX 11
+#define DEBUG_TX 12
+#define DEBUG_SPEED 38400
+#define DEBUG_INTERVAL 333
 #endif
 
 // hardware
@@ -43,14 +49,6 @@
 #define ENC_A 14
 #define ENC_B 15
 #define ENC_PORT PINC
-
-// debug
-#if DEBUG
-#define DEBUG_RX 11
-#define DEBUG_TX 12
-#define DEBUG_SPEED 38400
-#define DEBUG_INTERVAL 333
-#endif
 
 // states
 #define CLOCK_INTERNAL 1
@@ -199,7 +197,7 @@ void onStateClick(Button &b)
         return;
     }
 
-    if (b.holdTime() >= HOLD_THRESH) // TODO constant
+    if (b.holdTime() >= HOLD_THRESH)
     {
         switch (intState)
         {
@@ -219,7 +217,7 @@ void onStateClick(Button &b)
             nextIntState = STATUS_STOP;
             break;
         case STATUS_STOP:
-            nextIntState = STATUS_CONTINUE; // TODO
+            nextIntState = STATUS_CONTINUE;
             break;
         }
     }
@@ -353,13 +351,14 @@ setup()
     else
         nextIntState = config.state;
     cycleTime = config.cycle;
+
     // initialize
     extTime = 0;
     intTime = 0;
     cpqnInt = 0;
     cpqnExt = 0;
-    setMode(CLOCK_INTERNAL); // TODO check
-    colorLeft = BICOLOR_RED; // TODO check
+    colorLeft = BICOLOR_RED;
+    setMode(CLOCK_INTERNAL);
 
     // enable midi communication
     MIDI_PORT.begin(31250);
