@@ -1,10 +1,11 @@
-Arduino MIDIsync - ATMEGA328P based MIDI Master Clock Generator
+Arduino "MIDIsync"
+ATMEGA328P based MIDI Master Clock Generator
 ===============================================================
 
 So far, only the source code is available.
 Schematics and stuff are work in progress. Please stand by.
 
-A finished device has the following features:
+A finished device ("Hensel Model-01") has the following features:
 
 	- High-precision Master Clock
 		- MIDI Clock Output
