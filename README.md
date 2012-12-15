@@ -7,7 +7,7 @@ Working and tested on
 So far, only the source code is available.
 Schematics and stuff are work in progress. Please stand by.
 Pre-built devices are available upon request!
-Please contact me at Tom Hensel <tom@interpol8.net>
+Please contact me at tom /AT/ interpol8.net
 
 A pre-built device (nicknamed "Hensel Model-01") has the following features:
 
