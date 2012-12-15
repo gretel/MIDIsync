@@ -1,13 +1,16 @@
 Arduino "MIDIsync" - MIDI Master Clock Generator
 =
+ɔ 2012 Tom Hensel <tom@interpol8.net> Hamburg, Germany
+CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
+
 Working and tested on
 - Arduino Duemilanove http://arduino.cc/en/Main/arduinoBoardDuemilanove
 - Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno
 
-So far, only the source code is available.
+So far, only the source code is available!
 Schematics and stuff are work in progress. Please stand by.
 Pre-built devices are available upon request!
-Please contact me at tom /AT/ interpol8.net
+Please feel free to contact me at tom /AT/ interpol8.net
 
 A pre-built device (nicknamed "Hensel Model-01") has the following features:
 
