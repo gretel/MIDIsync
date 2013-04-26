@@ -8,8 +8,8 @@
 
 // id
 #define ID "MIDI_MASTER_CLOCK"
-#define VERSION 15122012
-#define DEBUG 1
+#define VERSION 19042013
+#define DEBUG 0
 
 // includes
 #include <avr/eeprom.h>
@@ -163,9 +163,9 @@ int8_t readEncoder()
 
 void setMode(uint8_t m)
 {
-#if DEBUG
-    debugSerial << "SET_MODE:FROM:" << mode << ":TO:" << m;
-#endif
+//#if DEBUG
+//    debugSerial << "SET_MODE:FROM:" << mode << ":TO:" << m;
+//#endif
     mode = m;
 }
 
@@ -538,7 +538,7 @@ loop()
     if (encData)
     {
         uint16_t inc;
-        if (tempoButton.holdTime() >= HOLD_THRESH)
+        if (tempoButton.holdTime() > HOLD_THRESH)
             inc = 500;
         else
             inc = 10;
