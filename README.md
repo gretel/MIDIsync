@@ -12,7 +12,7 @@ Schematics and stuff are work in progress. Please stand by.
 Pre-built devices are available upon request.
 Please feel free to contact me!
 
-A pre-built device (nicknamed "Hensel Model-01") has the following features:
+A pre-built device (nicknamed "Hensel MODEL-01") has the following features:
 
 	- High-precision Master Clock
 		- MIDI Clock Output
@@ -26,9 +26,10 @@ A pre-built device (nicknamed "Hensel Model-01") has the following features:
 		- Control pass-through of control messages to MIDI-OUT
 	- Settings can be saved in non-volatile memory
 	- Jumbo Tri-Color LEDs for Tempo and Status display
-	- MIDI-Thru (latency-free)
+	- MIDI-Thru (latency-free hardware circuit)
+	- [MIDI-Passthrough (merge MIDI-In with generated clock signals to MIDI-Out)]
 	- Tolerant power input (7-12V DC) and hardware power switch
 		- Low-power design, runs on batteries and USB-power (adapter required)
 		- Energy-efficient power supply included
 
-Libraries are missing. Going to add them ASAP. Thanks.
+Libraries are missing, going to add them... thanks.
