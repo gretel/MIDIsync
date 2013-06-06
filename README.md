@@ -5,7 +5,7 @@ CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
 
 Working and tested on
 - Arduino Duemilanove http://arduino.cc/en/Main/arduinoBoardDuemilanove
-- Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno
+- Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno (.hex binary provided)
 
 Should be compatible with the famous MIDI-Shield from Sparkfun (https://www.sparkfun.com/products/9595).
 
