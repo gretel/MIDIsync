@@ -1,5 +1,5 @@
 /*--------------------------------------------------------------------------------------------------
- "HENSEL MODEL01"
+ "Hensel MODEL-01"
  Arduino "MIDIsync" - MIDI Master Clock Generator
  https://github.com/gretel/MIDIsync
  ɔ 2012-2013 Tom Hensel <tom@interpol8.net> Hamburg, Germany
@@ -41,22 +41,22 @@
 #define MIDI_PORT Serial
 #define MIDI_BPS 31250
 #define BTN_ENCODER 2
-#define BTN_STATE 4
+#define BTN_STATE   4
 #define GATE_PIN 8
+#define ENC_A 14
+#define ENC_B 15
+#define ENC_PORT PINC
 #define LED_A 9
 #define LED_B 10
 #define LED_C 5
 #define LED_D 6
-#define ENC_A 14
-#define ENC_B 15
-#define ENC_PORT PINC
 
 // states
 #define CLOCK_INTERNAL 1
 #define CLOCK_EXTERNAL 2
 #define CLOCK_SYNC     3
 
-// timing
+// timings
 #define CLOCK_DETECTION_WINDOW 600000 // TODO description
 #define HOLD_THRESH 500 // TODO description
 
@@ -596,7 +596,7 @@ loop()
                 if (cycleTime < 70000)
                 {
                     cycleTime += inc; // TODO acceleration
-                    ledLeft.notify(BICOLOR_GREEN, 25, true);
+                    ledLeft.notify(BICOLOR_RED, 25, true);
                 }
                 break;
             case -4:
@@ -604,7 +604,7 @@ loop()
                 if (cycleTime > 5000)
                 {
                     cycleTime -= inc; // TODO acceleration
-                    ledLeft.notify(BICOLOR_RED, 25, true);
+                    ledLeft.notify(BICOLOR_GREEN, 25, true);
                 }
                 break;
             }
