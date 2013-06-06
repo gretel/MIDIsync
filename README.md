@@ -1,6 +1,6 @@
 Arduino "MIDIsync" - MIDI Master Clock Generator
 =
-ɔ 2012 Tom Hensel <tom@interpol8.net> Hamburg, Germany
+ɔ 2012-2013 Tom Hensel <tom@interpol8.net> Hamburg, Germany
 CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
 
 Working and tested on
