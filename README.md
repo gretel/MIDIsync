@@ -24,11 +24,11 @@ A pre-built device (nicknamed "Hensel MODEL-01") has the following features:
 	- Control MIDI Equipment (start, continue, stop)
 	- Split-Mode - Synchronize to external MIDI Clock
 		- Quickly toggle between both speeds (internal/external)
-		- Control pass-through of control messages to MIDI-OUT
+		- [Control pass-through of control messages to MIDI-OUT]
 	- Settings can be saved in non-volatile memory
 	- Jumbo Tri-Color LEDs for Tempo and Status display
 	- MIDI-Thru (latency-free hardware circuit)
-	- [MIDI-Passthrough (merge MIDI-In with generated clock signals to MIDI-Out)]
+	- [MIDI-Forward (merge MIDI-In with generated clock signals to MIDI-Out)]
 	- Tolerant power input (7-12V DC) and hardware power switch
 		- Low-power design, runs on batteries and USB-power (adapter required)
 		- Energy-efficient power supply included
