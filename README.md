@@ -7,10 +7,11 @@ Working and tested on
 - Arduino Duemilanove http://arduino.cc/en/Main/arduinoBoardDuemilanove
 - Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno
 
-So far, only the source code is available!
+Should be compatible with the famous MIDI-Shield from Sparkfun (https://www.sparkfun.com/products/9595).
+
 Schematics and stuff are work in progress. Please stand by.
-Pre-built devices are available upon request.
-Please feel free to contact me!
+Pre-built devices are available upon request - please feel free to contact me!
+Libraries are missing too, so you might have a hard time compiling the code on your own for now.
 
 A pre-built device (nicknamed "Hensel MODEL-01") has the following features:
 
@@ -32,4 +33,4 @@ A pre-built device (nicknamed "Hensel MODEL-01") has the following features:
 		- Low-power design, runs on batteries and USB-power (adapter required)
 		- Energy-efficient power supply included
 
-Libraries are missing, going to add them... thanks.
+
