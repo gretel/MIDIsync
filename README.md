@@ -1,4 +1,5 @@
-Arduino "MIDIsync" - MIDI Master Clock Generator
+Arduino "MIDIsync"
+MIDI Master Clock Generator
 =
 ɔ 2012-2013 Tom Hensel <tom@interpol8.net> Hamburg, Germany
 CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
