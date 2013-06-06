@@ -450,8 +450,3 @@ $(ARDUINOLIB): $(ARDUINOLIBOBJS)
 .lib/%.C.o: %.C
 	mkdir -p $(dir $@)
 	$(COMPILE.cpp) -o $@ $<
-
-# Local Variables:
-# mode: makefile
-# tab-width: 4
-# End:

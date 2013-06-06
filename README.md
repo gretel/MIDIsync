@@ -1,18 +1,19 @@
-Arduino "MIDIsync" - MIDI Master Clock Generator
+Arduino "MIDIsync" MIDI and CV Master Clock
 =
-ɔ 2012 Tom Hensel <tom@interpol8.net> Hamburg, Germany
+ɔ 2012-2013 Tom Hensel <tom@interpol8.net> Hamburg, Germany
 CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
 
 Working and tested on
 - Arduino Duemilanove http://arduino.cc/en/Main/arduinoBoardDuemilanove
 - Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno
 
-So far, only the source code is available!
-Schematics and stuff are work in progress. Please stand by.
-Pre-built devices are available upon request.
-Please feel free to contact me!
+Should be compatible with the famous MIDI-Shield from Sparkfun (https://www.sparkfun.com/products/9595).
 
-A pre-built device (nicknamed "Hensel Model-01") has the following features:
+Schematics and stuff are work in progress. Please stand by.
+Pre-built devices are available upon request - please feel free to contact me!
+Libraries are missing too, so you might have a hard time compiling the code on your own for now.
+
+A pre-built device (nicknamed "Hensel MODEL-01") has the following features:
 
 	- High-precision Master Clock
 		- MIDI Clock Output
@@ -24,13 +25,12 @@ A pre-built device (nicknamed "Hensel Model-01") has the following features:
 	- Split-Mode - Synchronize to external MIDI Clock
 		- Quickly toggle between both speeds (internal/external)
 		- Control pass-through of control messages to MIDI-OUT
-		- [Skew-Clock clock output manually (Swing)]
 	- Settings can be saved in non-volatile memory
 	- Jumbo Tri-Color LEDs for Tempo and Status display
-	- MIDI-Thru (latency-free)
-	- [Panic Function (All-Notes-Off)]
+	- MIDI-Thru (latency-free hardware circuit)
+	- [MIDI-Passthrough (merge MIDI-In with generated clock signals to MIDI-Out)]
 	- Tolerant power input (7-12V DC) and hardware power switch
 		- Low-power design, runs on batteries and USB-power (adapter required)
 		- Energy-efficient power supply included
 
-Libraries are missing. Going to add them ASAP. Thanks.
+
