@@ -2,13 +2,13 @@
  "HENSEL MODEL01"
  Arduino "MIDIsync" - MIDI Master Clock Generator
  https://github.com/gretel/MIDIsync
- ɔ 2012 Tom Hensel <tom@interpol8.net> Hamburg, Germany
+ ɔ 2012-2013 Tom Hensel <tom@interpol8.net> Hamburg, Germany
  CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
  --------------------------------------------------------------------------------------------------*/
 
 // id
 #define ID "MIDI_MASTER_CLOCK"
-#define VERSION 19042013
+#define VERSION 06062013
 #define DEBUG 0
 
 // includes
@@ -54,11 +54,10 @@
 #define CLOCK_INTERNAL 1
 #define CLOCK_EXTERNAL 2
 #define CLOCK_SYNC     3
-//#define CLOCK_SKEW     4
 
 // timing
-#define CLOCK_DETECTION_WINDOW 600000
-#define HOLD_THRESH 500
+#define CLOCK_DETECTION_WINDOW 600000 // TODO description
+#define HOLD_THRESH 500 // TODO description
 
 struct config_t
 {
@@ -293,11 +292,6 @@ void onTempoClick(Button &b)
         setMode(CLOCK_INTERNAL);
         ledLeft.off();
         break;
-        /*
-        case CLOCK_SKEW:
-            // TODO
-            break;
-        */
     }
 }
 
@@ -450,14 +444,7 @@ loop()
                     else if (cpqnExt == config.cpqn / 2)
                         ledLeft.off(true);
                     break;
-                    /*
-                    case CLOCK_SKEW:
-                        // TODO cycleTimeSkew timer
-                        // MIDI_PORT.write(STATUS_SYNC);
-                        break;
-                    */
                 case CLOCK_SYNC:
-                    // TODO implement delay (skewing)
                     MIDI_PORT.write(STATUS_SYNC);
                     if (cpqnExt == config.cpqn)
                     {
@@ -549,7 +536,6 @@ loop()
         {
         case CLOCK_INTERNAL:
         case CLOCK_EXTERNAL:
-            //case CLOCK_SYNC: // TODO
             // TODO fix logic (UP/DOWN flag)
             switch (counter)
             {
@@ -557,7 +543,7 @@ loop()
                 counter = 0;
                 if (cycleTime < 70000)
                 {
-                    cycleTime += inc; // TODO
+                    cycleTime += inc; // TODO acceleration
                     ledRight.notify(BICOLOR_YELLOW, 25, true);
                 }
                 break;
@@ -565,31 +551,12 @@ loop()
                 counter = 0;
                 if (cycleTime > 5000)
                 {
-                    cycleTime -= inc; // TODO
+                    cycleTime -= inc; // TODO acceleration
                     ledRight.notify(BICOLOR_YELLOW, 25, true);
                 }
                 break;
             }
             break;
-            /*
-            case CLOCK_SKEW:
-                break;
-            case CLOCK_SYNC:
-                switch (counter)
-                {
-                case 4:
-                    counter = 0;
-                    // TODO
-                    ledRight.notify(BICOLOR_YELLOW, 25, true);
-                    break;
-                case -4:
-                    counter = 0;
-                    // TODO
-                    ledRight.notify(BICOLOR_YELLOW, 25, true);
-                    break;
-                }
-                break;
-                */
         }
     }
 
@@ -604,7 +571,6 @@ loop()
             break;
         case STATUS_START:
             MIDI_PORT.write(STATUS_START);
-            //everStarted = true;
             colorRight = BICOLOR_GREEN;
             break;
         case STATUS_CONTINUE:
