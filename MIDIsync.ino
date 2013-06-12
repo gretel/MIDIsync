@@ -8,7 +8,7 @@
 
 // id
 #define ID "MIDI_MASTER_CLOCK"
-#define VERSION 06062013
+#define VERSION 12062013
 #define DEBUG 0
 
 // includes
@@ -206,6 +206,7 @@ void onStateClick(Button &b)
         writeConfig();
         return;
     }
+    // TODO buggy?
     if (b.holdTime() >= HOLD_THRESH * 3)
     {
         // toggle
@@ -252,8 +253,8 @@ void onStateClick(Button &b)
 
 void onTempoClick(Button &b)
 {
-    if (b.holdTime() > HOLD_THRESH)
-        // TODO show internal clock tepo on hold
+    if (b.holdTime() >= HOLD_THRESH)
+        // TODO show internal clock tempo on hold
         return;
 
     uint32_t tapCycle;
@@ -284,6 +285,7 @@ void onTempoClick(Button &b)
             if (tapCounter >= 4)
             {
                 // set new cycle time
+                // TODO ensure minimum/maximum
                 cycleTime = tapCycle / config.cpqn;
                 // give feedback
                 ledLeft.notify(BICOLOR_YELLOW, 75, true);
@@ -317,13 +319,16 @@ void onTempoClick(Button &b)
 // https://github.com/projectgus/hairless-midiserial/blob/master/ardumidi/ardumidi.cpp
 uint8_t messageAvailable() {
     /* This bit will check that next bytes to be read would actually
-       have the midi status bit. If not it will remove uncorrect bytes
-       from internal buffer */
-    while ((MIDI_PORT.available() > 0) && ((MIDI_PORT.peek() & B10000000) != 0x80)) {
-        // remove from buffer
-        MIDI_PORT.read();
-    }
+        have the midi status bit. If not it will remove uncorrect bytes
+        from internal buffer */
 
+    while ((MIDI_PORT.available() > 0) && ((MIDI_PORT.peek() & B10000000) != 0x80)) {
+        if(config.thru)
+            MIDI_PORT.write(MIDI_PORT.read());
+        else
+             // remove from buffer
+            MIDI_PORT.read();
+    }
     /* Well we don't exactly know how many commands there might be in the Serial buffer
         so we'll just guess it according the type of message that happens to be waiting
         in the buffer. At least we get first one right! */
@@ -333,24 +338,31 @@ uint8_t messageAvailable() {
     }
     return (MIDI_PORT.available()/3);
 }
-
+/*
+void sendMessage(uint8_t command, uint8_t channel, uint8_t param1, uint8_t param2)
+{
+    MIDI_PORT.write(command | (channel & 0x0F));
+    MIDI_PORT.write(param1 & 0x7F);
+    MIDI_PORT.write(param2 & 0x7F);
+}
+*/
 midi_msg_t readMessage() {
     midi_msg_t message;
     uint8_t midi_status = MIDI_PORT.read();
     message.command = (midi_status & B11110000);
     message.channel = (midi_status & B00001111);
     message.param1  = MIDI_PORT.read();
+    if(config.thru)
+    {
+        MIDI_PORT.write(midi_status);
+        MIDI_PORT.write(message.param1);
+    }
     if (message.command != MIDI_PROGRAM_CHANGE && message.command != MIDI_CHANNEL_PRESSURE) {
         message.param2 = MIDI_PORT.read();
+        if(config.thru)
+            MIDI_PORT.write(message.param2);
     }
     return message;
-}
-
-void sendMessage(uint8_t command, uint8_t channel, uint8_t param1, uint8_t param2)
-{
-    MIDI_PORT.write(command | (channel & 0x0F));
-    MIDI_PORT.write(param1 & 0x7F);
-    MIDI_PORT.write(param2 & 0x7F);
 }
 
 extern void __attribute__((noreturn))
@@ -387,7 +399,7 @@ setup()
         resetConfig();
     }
 #if DEBUG
-    debugSerial << "CONFIG:READ:" << config.state << " " << config.cpqn  << " " << config.cycle << endl;
+    debugSerial << "CONFIG:READ:" << config.state << " " << config.cpqn << " " << config.cycle << " " << config.thru << endl;
     debugTime = millis() + DEBUG_INTERVAL;
 #endif
     // copy values
@@ -539,18 +551,6 @@ loop()
             colorLeft = BICOLOR_GREEN;
             ledLeft.notify(BICOLOR_GREEN, 200, true);
             break;
-        default:
-            // passthrough midi-in->midi-out
-            if(config.thru)
-            {
-/*
-                #if DEBUG
-                debugSerial << "MIDI:THRU:" << m.command << " " << m.channel << " " << m.param1 << " " << m.param2 << endl;
-                #endif
-*/
-                sendMessage(m.command, m.channel, m.param1, m.param2);
-            }
-            break;
         }
     }
     if ((micros() - extTime >= CLOCK_DETECTION_WINDOW))
@@ -601,7 +601,7 @@ loop()
                 break;
             case -4:
                 counter = 0;
-                if (cycleTime > 5000)
+                if (cycleTime > 9000)
                 {
                     cycleTime -= inc; // TODO acceleration
                     ledLeft.notify(BICOLOR_GREEN, 25, true);
