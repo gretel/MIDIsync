@@ -18,15 +18,14 @@
 #include "Arduino.h"
 
 // 3rd party includes
-#include <digitalWriteFast.h>
-#include <Streaming.h>
-#include <EEPROM.h>
-#include <EEPROMAnything.h>
-#include <movingAvg.h>
-#include <BiColorLED.h>
-#include <Button.h>
-#define ENCODER_DO_NOT_USE_INTERRUPTS
-#include <Encoder.h>
+#include "digitalWriteFast.h"
+#include "Streaming.h"
+#include "movingAvg.h"
+#include "BiColorLED.h"
+#include "Button.h"
+
+#define ENCODER_DO_NOT_USE_INTERRUPTS 1
+#include "Encoder.h"
 
 #if DEBUG
 #include <SoftwareSerial.h>
@@ -142,7 +141,8 @@ void resetConfig()
     // TODO DEBUG !!!
     config.thru = true;
     // write to non-volatile memory
-    EEPROM_writeAnything(0, config);
+    //EEPROM_writeAnything(0, config);
+    eeprom_write_block((const void*)&config, (void*)0, sizeof(config));
     do
     {
         delay(100); // paranoia
@@ -162,7 +162,8 @@ void writeConfig()
     debugSerial << "CONFIG:WRITE:" << config.state << " " << config.cpqn << " " << config.cycle << endl;
 #endif
     // write to non-volatile memory
-    EEPROM_writeAnything(0, config);
+    //EEPROM_writeAnything(0, config);
+    eeprom_write_block((const void*)&config, (void*)0, sizeof(config));
     delay(100); // paranoia
     // give feedback
     ledLeft.notify(BICOLOR_GREEN, 1500, true);
@@ -308,9 +309,18 @@ void onTempoClick(Button &b)
     }
 }
 
+
+
 uint8_t messageAvailable()
 {
+
     const uint8_t avail = MIDI_PORT.available();
+   switch (avail) {
+    case 1 ... 8:                       // digits 0-8 (0 & 9 not used)
+      // stuff
+     break;
+     } 
+
     if (avail > 0 && config.thru)
     {
 #if DEBUG
@@ -369,7 +379,8 @@ setup()
     debugSerial << endl << ID << ":" << VERSION << endl;
 #endif
     // read configuration from non-volatile memory
-    EEPROM_readAnything(0, config);
+    //EEPROM_readAnything(0, config);
+    eeprom_read_block((void*)&config, (void*)0, sizeof(config));
     // check if data has been written and loaded using the same firmware version
     // or if the reset combo is being pressed on startup
     if ((config.version != (uint16_t)VERSION) || (stateButton.isPressed() && tempoButton.isPressed()))

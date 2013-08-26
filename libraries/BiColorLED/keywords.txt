@@ -1,0 +1,31 @@
+#######################################
+# Syntax Coloring Map For BiColorLED
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+BiColorLED	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+drive	KEYWORD2
+setColor	KEYWORD2
+getColor	KEYWORD2
+setColor2	KEYWORD2
+getColor2	KEYWORD2
+setBlinkSpeed	KEYWORD2
+getBlinkSpeed	KEYWORD2
+
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+BiColorLED_H	LITERAL1
