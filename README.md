@@ -11,7 +11,7 @@ Should be compatible with the famous MIDI-Shield from Sparkfun (https://www.spar
 
 Schematics and stuff are work in progress. Please stand by.
 Pre-built devices are available upon request - please feel free to contact me!
-Libraries are missing too, so you might have a hard time compiling the code on your own for now.
+Libraries are included now, you might still have a hard time compiling the code on your own.
 
 A pre-built device (nicknamed "Hensel MODEL-01") has the following features:
 

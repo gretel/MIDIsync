@@ -8,7 +8,7 @@
 
 // id
 #define ID "MIDI_MASTER_CLOCK"
-#define VERSION 13062013
+#define VERSION 27082013
 #define DEBUG 0
 
 // includes
