@@ -7,6 +7,8 @@ Working and tested on
 - Arduino Duemilanove http://arduino.cc/en/Main/arduinoBoardDuemilanove
 - Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno (.hex binary provided)
 
+[![Coverage Status](https://coveralls.io/repos/gretel/MIDIsync/badge.png)](https://coveralls.io/r/gretel/MIDIsync)
+
 Should be compatible with the famous MIDI-Shield from Sparkfun (https://www.sparkfun.com/products/9595).
 
 Schematics and stuff are work in progress. Please stand by.
