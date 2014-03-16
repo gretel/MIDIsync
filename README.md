@@ -1,6 +1,6 @@
 Arduino "MIDIsync" MIDI and CV Master Clock
 =
-ɔ 2012-2013 Tom Hensel <tom@jitter.eu> Hamburg, Germany
+ɔ 2012-2014 Tom Hensel <tom@jitter.eu> Hamburg, Germany
 CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
 
 Working and tested on
