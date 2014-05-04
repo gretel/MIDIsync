@@ -8,7 +8,7 @@
 
 // id
 #define ID "MIDI_MASTER_CLOCK"
-#define VERSION 27082013
+#define VERSION 05052014
 #define DEBUG 0
 
 // includes
@@ -76,7 +76,7 @@ struct config_t
     uint8_t state;
     uint8_t cpqn;
     uint8_t thru;
-} config;
+    } config;
 
 // variables
 uint8_t mode; // TODO struct
@@ -111,25 +111,25 @@ void printDiag()
     const uint16_t average = profilingFilter.reading(duration);
 
     debugSerial << " COUNT: " << micros()
-                << " LOOP: " << duration
-                << " AVG: " << average
-                << " MODE: " << mode
-                << " THRU: " << config.thru
-                << " CYLC_I: " << cycleTime
-                << " CYLC_E: " << cycleTimeExt
-                << " STATE_I: " << intState
-                << " STATE_E: " << extState
-                << " CPQN_I: " << cpqnInt
-                << " CPQN_E: " << cpqnExt
-                << endl;
+    << " LOOP: " << duration
+    << " AVG: " << average
+    << " MODE: " << mode
+    << " THRU: " << config.thru
+    << " CYLC_I: " << cycleTime
+    << " CYLC_E: " << cycleTimeExt
+    << " STATE_I: " << intState
+    << " STATE_E: " << extState
+    << " CPQN_I: " << cpqnInt
+    << " CPQN_E: " << cpqnExt
+    << endl;
 }
 #endif
 
 void resetConfig()
 {
-#if DEBUG
+    #if DEBUG
     debugSerial << "CONFIG:RESET" << endl;
-#endif
+    #endif
     // lights on
     digitalWriteFast(LED_A, HIGH);
     digitalWriteFast(LED_C, HIGH);
@@ -138,10 +138,8 @@ void resetConfig()
     config.cpqn = 24;
     config.cycle = 20000;
     config.state = STATUS_STOP;
-    // TODO DEBUG !!!
-    config.thru = true;
+    config.thru = false;
     // write to non-volatile memory
-    //EEPROM_writeAnything(0, config);
     eeprom_write_block((const void*)&config, (void*)0, sizeof(config));
     do
     {
@@ -158,11 +156,10 @@ void writeConfig()
     config.version = (uint16_t)VERSION;
     config.cycle = cycleTime;
     config.state = intState;
-#if DEBUG
+    #if DEBUG
     debugSerial << "CONFIG:WRITE:" << config.state << " " << config.cpqn << " " << config.cycle << endl;
-#endif
+    #endif
     // write to non-volatile memory
-    //EEPROM_writeAnything(0, config);
     eeprom_write_block((const void*)&config, (void*)0, sizeof(config));
     delay(100); // paranoia
     // give feedback
@@ -186,10 +183,10 @@ int8_t readEncoder()
 
 void setMode(uint8_t m)
 {
-#if DEBUG
+    #if DEBUG
     if (mode != m)
-        debugSerial << "SET_MODE:FROM:" << mode << ":TO:" << m;
-#endif
+    debugSerial << "SET_MODE:FROM:" << mode << ":TO:" << m;
+    #endif
     mode = m;
 }
 
@@ -200,7 +197,7 @@ void onStateClick(Button &b)
         writeConfig();
         return;
     }
-    // TODO buggy?
+    // TODO might be worth to have some tuning here
     if (b.holdTime() > HOLD_THRESH * 3)
     {
         // toggle
@@ -209,24 +206,24 @@ void onStateClick(Button &b)
         switch (config.thru)
         {
             case true:
-                ledLeft.notify(BICOLOR_GREEN, 333, true);
-                break;
+            ledLeft.notify(BICOLOR_GREEN, 333, true);
+            break;
             case false:
-                ledLeft.notify(BICOLOR_RED, 333, true);
-                break;
+            ledLeft.notify(BICOLOR_RED, 333, true);
+            break;
         }
-#if DEBUG
+        #if DEBUG
         debugSerial << "THRU:" << config.thru;
-#endif
+        #endif
     }
     else if (b.holdTime() > HOLD_THRESH)
     {
         switch (intState)
         {
             case STATUS_STOP:
-                nextIntState = STATUS_START;
-                ledRight.notify(BICOLOR_YELLOW, 150, true);
-                break;
+            nextIntState = STATUS_START;
+            ledRight.notify(BICOLOR_YELLOW, 150, true);
+            break;
         }
     }
     else
@@ -238,22 +235,22 @@ void onStateClick(Button &b)
                 // running, stop
                 nextIntState = STATUS_STOP;
                 break;
-            case STATUS_STOP:
+                case STATUS_STOP:
                 nextIntState = STATUS_CONTINUE;
                 break;
+            }
         }
     }
-}
 
-void onTempoClick(Button &b)
-{
-    if (b.holdTime() > HOLD_THRESH)
+    void onTempoClick(Button &b)
+    {
+        if (b.holdTime() > HOLD_THRESH)
         // TODO show internal clock tempo on hold
         return;
 
-    switch (mode)
-    {
-        case CLOCK_INTERNAL:
+        switch (mode)
+        {
+            case CLOCK_INTERNAL:
             static uint8_t tapCounter = 0;
             static uint32_t lastTapTime;
             static uint32_t tapTimer;
@@ -287,72 +284,47 @@ void onTempoClick(Button &b)
                 else
                     // give feedback
                     ledLeft.notify(BICOLOR_YELLOW, 75, true);
-            }
+                }
             // store current time
             lastTapTime = micros();
             tapTimeout = micros() + (config.cpqn * 100000);
             break;
-        case CLOCK_EXTERNAL:
+            case CLOCK_EXTERNAL:
             // change mode
             setMode(CLOCK_SYNC);
             // copy
             cpqnInt = cpqnExt;
             if (extState > 0)
                 nextIntState = extState; // TODO CHECK
-            ledRight.off();
-            break;
-        case CLOCK_SYNC:
+                ledRight.off();
+                break;
+                case CLOCK_SYNC:
             // change mode
             setMode(CLOCK_INTERNAL);
             ledLeft.off();
             break;
+        }
     }
-}
 
-
-
-uint8_t messageAvailable()
-{
-
-    const uint8_t avail = MIDI_PORT.available();
-   switch (avail) {
-    case 1 ... 8:                       // digits 0-8 (0 & 9 not used)
-      // stuff
-     break;
-     } 
-
-    if (avail > 0 && config.thru)
+    uint8_t messageAvailable()
     {
-#if DEBUG
+        const uint8_t avail = MIDI_PORT.available();
+        switch (avail) {
+            case 1 ... 8:                       // digits 0-8 (0 & 9 not used)
+              // stuff
+              break;
+      }
+
+      if (avail > 0 && config.thru)
+      {
+        #if DEBUG
         debugSerial << "MIDI:THRU:" << avail << endl;
-#endif
+        #endif
         MIDI_PORT.write(MIDI_PORT.peek());
     }
     return avail;
-}
-/*
-void sendMessage(uint8_t command, uint8_t channel, uint8_t param1, uint8_t param2)
-{
-    MIDI_PORT.write(command | (channel & 0x0F));
-    MIDI_PORT.write(param1 & 0x7F);
-    MIDI_PORT.write(param2 & 0x7F);
-}
-*/
-/*
-midi_msg_t readMessage()
-{
-    midi_msg_t message;
-    uint8_t midi_status = MIDI_PORT.read();
-    message.command = (midi_status & B11110000);
-    message.channel = (midi_status & B00001111);
-    message.param1  = MIDI_PORT.read();
-    if (message.command != MIDI_PROGRAM_CHANGE && message.command != MIDI_CHANNEL_PRESSURE)
-    {
-        message.param2 = MIDI_PORT.read();
     }
-    return message;
-}
-*/
+
 extern void __attribute__((noreturn))
 setup()
 {
@@ -368,7 +340,7 @@ setup()
     pinMode(ENC_B, INPUT);
     digitalWriteFast(ENC_B, HIGH);
     pinMode(GATE_PIN, OUTPUT);
-#if DEBUG
+    #if DEBUG
     // setup software serial for debugging output
     pinMode(DEBUG_RX, INPUT);
     pinMode(DEBUG_TX, OUTPUT);
@@ -377,9 +349,8 @@ setup()
     debugSerial << "\x1b\x63" << "\x1b[2J" << "\x1b[?25l";
     // output some basic info
     debugSerial << endl << ID << ":" << VERSION << endl;
-#endif
+    #endif
     // read configuration from non-volatile memory
-    //EEPROM_readAnything(0, config);
     eeprom_read_block((void*)&config, (void*)0, sizeof(config));
     // check if data has been written and loaded using the same firmware version
     // or if the reset combo is being pressed on startup
@@ -387,15 +358,15 @@ setup()
     {
         resetConfig();
     }
-#if DEBUG
+    #if DEBUG
     debugSerial << "CONFIG:READ:" << config.state << " " << config.cpqn << " " << config.cycle << " " << config.thru << endl;
     debugTime = millis() + DEBUG_INTERVAL;
-#endif
+    #endif
     // copy values
     if (config.state == STATUS_CONTINUE)
-        nextIntState = STATUS_START;
+    nextIntState = STATUS_START;
     else
-        nextIntState = config.state;
+    nextIntState = config.state;
     cycleTime = config.cycle;
     // initialize
     extTime = 0;
@@ -462,36 +433,36 @@ loop()
                 }
             }
             break;
-    }
+        }
 
-    uint32_t diff;
-    while (messageAvailable() > 0)
-    {
-        const uint8_t command = MIDI_PORT.read() & B11110000;
-#if DEBUG
-        debugSerial << "MIDI:COMMAND:" << command << " " << endl;
-#endif
-        switch (command)
+        uint32_t diff;
+        while (messageAvailable() > 0)
         {
-            case STATUS_SYNC:
+            const uint8_t command = MIDI_PORT.read() & B11110000;
+            #if DEBUG
+            debugSerial << "MIDI:COMMAND:" << command << " " << endl;
+            #endif
+            switch (command)
+            {
+                case STATUS_SYNC:
                 diff = micros() - extTime; // TODO optimize
                 if (diff > 0)
-                    cycleTimeExt = (uint32_t)cycleTimeExtFilter.reading(diff);
+                cycleTimeExt = (uint32_t)cycleTimeExtFilter.reading(diff);
                     //cycleTimeExt = diff;
-                extTime = micros();
-                cpqnExt++;
-                switch (mode)
-                {
-                    case CLOCK_EXTERNAL:
+                    extTime = micros();
+                    cpqnExt++;
+                    switch (mode)
+                    {
+                        case CLOCK_EXTERNAL:
                         if (cpqnExt == config.cpqn)
                         {
                             ledLeft.setColor(colorLeft, true);
                             cpqnExt = 0;
                         }
                         else if (cpqnExt == config.cpqn / 2)
-                            ledLeft.off(true);
+                        ledLeft.off(true);
                         break;
-                    case CLOCK_SYNC:
+                        case CLOCK_SYNC:
                         MIDI_PORT.write(STATUS_SYNC);
                         //                        MIDI_PORT.flush();
                         if (cpqnExt == config.cpqn)
@@ -508,47 +479,47 @@ loop()
                             ledRight.off(true);
                         }
                         break;
+                    }
+                    break;
+                    case STATUS_STOP:
+                    if (mode == CLOCK_SYNC)
+                    {
+                        nextIntState = command;
+                        colorRight = BICOLOR_RED;
+                    }
+                    extState = command;
+                    colorLeft = BICOLOR_RED;
+                    ledLeft.notify(BICOLOR_RED, 200, true);
+                    break;
+                    case STATUS_START:
+                    if (mode == CLOCK_SYNC)
+                    {
+                        nextIntState = command;
+                        colorRight = BICOLOR_GREEN;
+                    }
+                    extState = command;
+                    colorLeft = BICOLOR_GREEN;
+                    ledLeft.notify(BICOLOR_YELLOW, 200, true);
+                    break;
+                    case STATUS_CONTINUE:
+                    if (mode == CLOCK_SYNC)
+                    {
+                        colorRight = BICOLOR_GREEN;
+                        nextIntState = command;
+                    }
+                    extState = command;
+                    colorLeft = BICOLOR_GREEN;
+                    ledLeft.notify(BICOLOR_GREEN, 200, true);
+                    break;
                 }
-                break;
-            case STATUS_STOP:
-                if (mode == CLOCK_SYNC)
-                {
-                    nextIntState = command;
-                    colorRight = BICOLOR_RED;
-                }
-                extState = command;
-                colorLeft = BICOLOR_RED;
-                ledLeft.notify(BICOLOR_RED, 200, true);
-                break;
-            case STATUS_START:
-                if (mode == CLOCK_SYNC)
-                {
-                    nextIntState = command;
-                    colorRight = BICOLOR_GREEN;
-                }
-                extState = command;
-                colorLeft = BICOLOR_GREEN;
-                ledLeft.notify(BICOLOR_YELLOW, 200, true);
-                break;
-            case STATUS_CONTINUE:
-                if (mode == CLOCK_SYNC)
-                {
-                    colorRight = BICOLOR_GREEN;
-                    nextIntState = command;
-                }
-                extState = command;
-                colorLeft = BICOLOR_GREEN;
-                ledLeft.notify(BICOLOR_GREEN, 200, true);
-                break;
-        }
-    }
-    if ((micros() - extTime > CLOCK_DETECTION_WINDOW))
-    {
-        extTime = 0;
-        cpqnExt = 0;
-        setMode(CLOCK_INTERNAL);
-        ledLeft.off();
-    }
+            }
+            if ((micros() - extTime > CLOCK_DETECTION_WINDOW))
+            {
+                extTime = 0;
+                cpqnExt = 0;
+                setMode(CLOCK_INTERNAL);
+                ledLeft.off();
+            }
     else if (extTime > 0) // TODO logic expression
     {
         if (mode == CLOCK_INTERNAL)
@@ -558,7 +529,7 @@ loop()
         }
     }
 
-    MIDI_PORT.flush(); // TODO test
+    MIDI_PORT.flush();
 
     // button library
     tempoButton.process();
@@ -572,26 +543,26 @@ loop()
         // TODO add acceleration curve feature
         if (tempoButton.holdTime() > 100) // TODO constant
             inc = 500; // TODO constant
-        else
+            else
             inc = 10; // TODO constant
-        counter += encData;
+            counter += encData;
 
-        switch (mode)
-        {
-            case CLOCK_INTERNAL:
-            case CLOCK_EXTERNAL:
+            switch (mode)
+            {
+                case CLOCK_INTERNAL:
+                case CLOCK_EXTERNAL:
                 // TODO fix logic (UP/DOWN flag)
                 switch (counter)
                 {
                     case 4:
-                        counter = 0;
-                        if (cycleTime < 70000)
-                        {
+                    counter = 0;
+                    if (cycleTime < 70000)
+                    {
                             cycleTime += inc; // TODO acceleration
                             ledLeft.notify(BICOLOR_RED, 25, true);
                         }
                         break;
-                    case -4:
+                        case -4:
                         counter = 0;
                         if (cycleTime > 9000)
                         {
@@ -599,31 +570,31 @@ loop()
                             ledLeft.notify(BICOLOR_GREEN, 25, true);
                         }
                         break;
+                    }
+                    break;
                 }
-                break;
-        }
-    }
+            }
     // compare
     if (intState != nextIntState)
     {
         switch (nextIntState)
         {
             case STATUS_STOP:
-                MIDI_PORT.write(STATUS_STOP);
-                colorRight = BICOLOR_RED;
-                break;
+            MIDI_PORT.write(STATUS_STOP);
+            colorRight = BICOLOR_RED;
+            break;
             case STATUS_START:
-                MIDI_PORT.write(STATUS_START);
-                colorRight = BICOLOR_GREEN;
-                break;
+            MIDI_PORT.write(STATUS_START);
+            colorRight = BICOLOR_GREEN;
+            break;
             case STATUS_CONTINUE:
-                MIDI_PORT.write(STATUS_CONTINUE);
-                colorRight = BICOLOR_GREEN;
-                break;
+            MIDI_PORT.write(STATUS_CONTINUE);
+            colorRight = BICOLOR_GREEN;
+            break;
         }
-#if DEBUG
+        #if DEBUG
         debugSerial << "INT_STATE:FROM:" << intState << ":TO:" << nextIntState << endl;
-#endif
+        #endif
         // store state (for comparison on next round)
         intState = nextIntState;
         ledRight.setColor(colorRight);
@@ -631,14 +602,14 @@ loop()
     // led library
     ledLeft.drive();
     ledRight.drive();
-#if DEBUG
+    #if DEBUG
     if ((millis() - debugTime) > DEBUG_INTERVAL)
     {
         printDiag();
         debugTime = millis();
     }
     loopCycle = micros();
-#endif
+    #endif
 }
 
 // end
