@@ -95,8 +95,8 @@ register uint8_t cpqnExt asm("r11");
 // variables depending on libraries
 movingAvg tapTimeFilter;
 movingAvg cycleTimeExtFilter;
-Button stateButton = Button(BTN_STATE, BUTTON_PULLDOWN, true, 30);
-Button tempoButton = Button(BTN_ENCODER, BUTTON_PULLDOWN, true, 30);
+Button tempoButton = Button(BTN_ENCODER, BUTTON_PULLDOWN);
+Button stateButton = Button(BTN_STATE, BUTTON_PULLDOWN);
 BiColorLED ledLeft = BiColorLED(LED_A, LED_B);
 BiColorLED ledRight = BiColorLED(LED_C, LED_D);
 
@@ -530,10 +530,6 @@ loop()
     }
 
     MIDI_PORT.flush();
-
-    // button library
-    tempoButton.process();
-    stateButton.process();
 
     static int8_t counter;
     int8_t encData = readEncoder();
