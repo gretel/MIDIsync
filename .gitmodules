@@ -1,0 +1,12 @@
+[submodule "libraries/Button"]
+	path = libraries/Button
+	url = https://github.com/tigoe/Button.git
+[submodule "libraries/movingAvg"]
+	path = libraries/movingAvg
+	url = git@github.com:gretel/movingAvg.git
+[submodule "libraries/digitalIOPerformance"]
+	path = libraries/digitalIOPerformance
+	url = https://github.com/projectgus/digitalIOPerformance.git
+[submodule "libraries/bicolorled"]
+	path = libraries/bicolorled
+	url = https://github.com/wolfgang42/bicolorled.git
