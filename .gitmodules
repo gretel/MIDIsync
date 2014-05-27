@@ -13,3 +13,6 @@
 [submodule "libraries/arduino_midi_library"]
 	path = libraries/arduino_midi_library
 	url = https://github.com/FortySevenEffects/arduino_midi_library.git
+[submodule "simple-buttons-arduino"]
+	path = simple-buttons-arduino
+	url = https://github.com/Harryman/simple-buttons-arduino.git
