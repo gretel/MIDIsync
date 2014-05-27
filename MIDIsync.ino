@@ -36,13 +36,15 @@
 #include "BiColorLED.h"
 // https://github.com/tigoe/Button
 #include "Button.h"
+// https://github.com/FortySevenEffects/arduino_midi_library
+#include "MIDI.h"
 
 // hardware
 #define BOARD_LED 13
 #define MIDI_PORT Serial
 #define MIDI_BPS 31250
 #define BTN_ENCODER 2
-#define BTN_STATE   4
+#define BTN_STATE 4
 #define GATE_PIN 8
 #define ENC_A 14
 #define ENC_B 15
@@ -97,8 +99,8 @@ register uint8_t cpqnExt asm("r11");
 // variables depending on libraries
 movingAvg tapTimeFilter;
 movingAvg cycleTimeExtFilter;
-Button tempoButton = Button(BTN_ENCODER, BUTTON_PULLDOWN);
-Button stateButton = Button(BTN_STATE, BUTTON_PULLDOWN);
+Button tempoButton = Button(BTN_ENCODER, true);
+Button stateButton = Button(BTN_STATE, true);
 BiColorLED ledLeft = BiColorLED(LED_A, LED_B);
 BiColorLED ledRight = BiColorLED(LED_C, LED_D);
 
@@ -192,33 +194,33 @@ void setMode(uint8_t m)
     mode = m;
 }
 
-void onStateClick(Button &b)
+void onStateClick()
 {
-    if (tempoButton.holdTime() > HOLD_THRESH * 3)
-    {
-        writeConfig();
-        return;
-    }
-    // TODO might be worth to have some tuning here
-    if (b.holdTime() > HOLD_THRESH * 3)
-    {
-        // toggle
-        config.thru = !config.thru;
+    // if (tempoButton.isHold())
+    // {
+    //     writeConfig();
+    //     return;
+    // }
+    // // TODO might be worth to have some tuning here
+    // if (stateButton.isHold())
+    // {
+    //     // toggle
+    //     config.thru = !config.thru;
 
-        switch (config.thru)
-        {
-            case true:
-            ledLeft.notify(BICOLOR_GREEN, 333, true);
-            break;
-            case false:
-            ledLeft.notify(BICOLOR_RED, 333, true);
-            break;
-        }
-        #if DEBUG
-        debugSerial << "THRU:" << config.thru;
-        #endif
-    }
-    else if (b.holdTime() > HOLD_THRESH)
+    //     switch (config.thru)
+    //     {
+    //         case true:
+    //         ledLeft.notify(BICOLOR_GREEN, 333, true);
+    //         break;
+    //         case false:
+    //         ledLeft.notify(BICOLOR_RED, 333, true);
+    //         break;
+    //     }
+    //     #if DEBUG
+    //     debugSerial << "THRU:" << config.thru;
+    //     #endif
+    // }
+    if (stateButton.isHold())
     {
         switch (intState)
         {
@@ -244,67 +246,63 @@ void onStateClick(Button &b)
         }
     }
 
-    void onTempoClick(Button &b)
+    void onTempoClick()
     {
-        if (b.holdTime() > HOLD_THRESH)
-        // TODO show internal clock tempo on hold
-        return;
-
         switch (mode)
         {
             case CLOCK_INTERNAL:
-            static uint8_t tapCounter = 0;
-            static uint32_t lastTapTime;
-            static uint32_t tapTimer;
-            static uint32_t tapTimeout;
+                static uint8_t tapCounter = 0;
+                static uint32_t lastTapTime;
+                static uint32_t tapTimer;
+                static uint32_t tapTimeout;
 
-            // check for timer timeout
-            if (micros() > tapTimeout)
-            {
-                // restart tap counter
-                tapTimeFilter.reset();
-                tapCounter = 1;
-                // give feedback
-                ledLeft.notify(BICOLOR_YELLOW, 75, true);
-            }
-            else
-            {
-                // calculate
-                tapCounter++;
-                tapTimer = micros() - lastTapTime;
-                //lastTapTime = micros();
-                const uint32_t tapCycle = tapTimeFilter.reading(tapTimer);
-                if (tapCounter >= 4)
+                // check for timer timeout
+                if (micros() > tapTimeout)
                 {
-                    // set new cycle time
-                    // TODO ensure minimum/maximum
-                    cycleTime = tapCycle / config.cpqn;
+                    // restart tap counter
+                    tapTimeFilter.reset();
+                    tapCounter = 1;
                     // give feedback
                     ledLeft.notify(BICOLOR_YELLOW, 75, true);
-                    ledRight.notify(BICOLOR_YELLOW, 75, true);
                 }
                 else
-                    // give feedback
-                    ledLeft.notify(BICOLOR_YELLOW, 75, true);
-                }
-            // store current time
-            lastTapTime = micros();
-            tapTimeout = micros() + (config.cpqn * 100000);
-            break;
-            case CLOCK_EXTERNAL:
-            // change mode
-            setMode(CLOCK_SYNC);
-            // copy
-            cpqnInt = cpqnExt;
-            if (extState > 0)
-                nextIntState = extState; // TODO CHECK
-                ledRight.setColor(0);
+                {
+                    // calculate
+                    tapCounter++;
+                    tapTimer = micros() - lastTapTime;
+                    //lastTapTime = micros();
+                    const uint32_t tapCycle = tapTimeFilter.reading(tapTimer);
+                    if (tapCounter >= 4)
+                    {
+                        // set new cycle time
+                        // TODO ensure minimum/maximum
+                        cycleTime = tapCycle / config.cpqn;
+                        // give feedback
+                        ledLeft.notify(BICOLOR_YELLOW, 75, true);
+                        ledRight.notify(BICOLOR_YELLOW, 75, true);
+                    }
+                    else
+                        // give feedback
+                        ledLeft.notify(BICOLOR_YELLOW, 75, true);
+                    }
+                // store current time
+                lastTapTime = micros();
+                tapTimeout = micros() + (config.cpqn * 100000);
                 break;
-                case CLOCK_SYNC:
-            // change mode
-            setMode(CLOCK_INTERNAL);
-            ledLeft.setColor(0);
-            break;
+            case CLOCK_EXTERNAL:
+                // change mode
+                setMode(CLOCK_SYNC);
+                // copy
+                cpqnInt = cpqnExt;
+                if (extState > 0)
+                    nextIntState = extState; // TODO CHECK
+                    ledRight.setColor(0);
+                    break;
+                    case CLOCK_SYNC:
+                // change mode
+                setMode(CLOCK_INTERNAL);
+                ledLeft.setColor(0);
+                break;
         }
     }
 
@@ -333,6 +331,7 @@ setup()
     // disable unused
     power_spi_disable();
     power_twi_disable();
+
     // begin of setup() - enable board led
     pinMode(BOARD_LED, OUTPUT);
     digitalWriteFast(BOARD_LED, HIGH);
@@ -356,7 +355,6 @@ setup()
 
     // read configuration from non-volatile memory
     eeprom_read_block((void*)&config, (void*)0, sizeof(config));
-
     // check if data has been written and loaded using the same firmware version
     // or if the reset combo is being pressed on startup
     if ((config.version != (uint16_t)VERSION) || (stateButton.isPressed() && tempoButton.isPressed()))
@@ -407,10 +405,6 @@ setup()
     analogWrite(LED_B, 0);
     analogWrite(LED_D, 0);
     delay(150);
-
-    // assign callbacks
-    tempoButton.clickHandler(onTempoClick);
-    stateButton.clickHandler(onStateClick);
 
     // end of setup() - disable board led
     digitalWriteFast(BOARD_LED, LOW);
@@ -548,7 +542,7 @@ loop()
     {
         uint16_t inc;
         // TODO add acceleration curve feature
-        if (tempoButton.holdTime() > 100) // TODO constant
+        if (tempoButton.isHold()) // TODO constant
             inc = 500; // TODO constant
         else
             inc = 10; // TODO constant
@@ -607,6 +601,13 @@ loop()
         intState = nextIntState;
         ledRight.setColor(colorRight);
     }
+
+    tempoButton.listen();
+    stateButton.listen();
+
+    if(stateButton.isPressed()) onStateClick();
+    if(tempoButton.isPressed()) onTempoClick();
+
     // led library
     ledLeft.drive();
     ledRight.drive();

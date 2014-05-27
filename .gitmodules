@@ -1,6 +1,3 @@
-[submodule "libraries/Button"]
-	path = libraries/Button
-	url = https://github.com/tigoe/Button.git
 [submodule "libraries/movingAvg"]
 	path = libraries/movingAvg
 	url = git@github.com:gretel/movingAvg.git
@@ -10,3 +7,9 @@
 [submodule "libraries/bicolorled"]
 	path = libraries/bicolorled
 	url = https://github.com/wolfgang42/bicolorled.git
+[submodule "libraries/Arduino-Library-Button"]
+	path = libraries/Arduino-Library-Button
+	url = https://github.com/carlynorama/Arduino-Library-Button.git
+[submodule "libraries/arduino_midi_library"]
+	path = libraries/arduino_midi_library
+	url = https://github.com/FortySevenEffects/arduino_midi_library.git
