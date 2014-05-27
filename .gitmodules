@@ -16,3 +16,6 @@
 [submodule "simple-buttons-arduino"]
 	path = simple-buttons-arduino
 	url = https://github.com/Harryman/simple-buttons-arduino.git
+[submodule "libraries/simple-buttons-arduino"]
+	path = libraries/simple-buttons-arduino
+	url = https://github.com/Harryman/simple-buttons-arduino.git
