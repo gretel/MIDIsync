@@ -3,16 +3,14 @@ Arduino "MIDIsync" MIDI and CV Master Clock
 ɔ 2012-2014 Tom Hensel <tom@jitter.eu> Hamburg, Germany
 CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
 
-Working and tested on
+At least running on
 - Arduino Duemilanove http://arduino.cc/en/Main/arduinoBoardDuemilanove
-- Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno (.hex binary provided)
+- Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno (.hex binary provided, and platform of test)
 
-[![Coverage Status](https://coveralls.io/repos/gretel/MIDIsync/badge.png)](https://coveralls.io/r/gretel/MIDIsync)
+Should (still!) be compatible with the famous-ol-MIDI-Shield from Sparkfun (https://www.sparkfun.com/products/9595).
 
-Should be compatible with the famous MIDI-Shield from Sparkfun (https://www.sparkfun.com/products/9595).
-
-Schematics and stuff are work in progress. Please stand by.
-Pre-built devices are available upon request - please feel free to contact me!
+Schematics and stuff are work in progress. Please stand by. Or wait forever.
+Pre-built devices are available upon request (1 left) - please feel free to contact me!
 Libraries are included now, you might still have a hard time compiling the code on your own.
 
 A pre-built device (nicknamed "Hensel MODEL-01") has the following features:
@@ -34,5 +32,3 @@ A pre-built device (nicknamed "Hensel MODEL-01") has the following features:
 	- Tolerant power input (7-12V DC) and hardware power switch
 		- Low-power design, runs on batteries and USB-power (adapter required)
 		- Energy-efficient power supply included
-
-
