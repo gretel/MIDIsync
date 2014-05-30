@@ -8,7 +8,7 @@
 
 // id
 #define ID "MIDI_MASTER_CLOCK"
-#define VERSION 27052014
+#define VERSION 31052014
 #define DEBUG 0
 
 // includes
@@ -63,13 +63,11 @@
 #define CLOCK_DETECTION_WINDOW 600000 // TODO description
 #define HOLD_THRESH 500 // TODO description
 
-// midi status
-// TODO rename
-#define STATUS_SYNC     0xF8
+// TODO migrate
+// #define STATUS_SYNC     0xF8
 #define STATUS_START    0xFA
 #define STATUS_CONTINUE 0xFB
 #define STATUS_STOP     0xFC
-// TODO rename
 #define MIDI_PROGRAM_CHANGE    0xC0
 #define MIDI_CHANNEL_PRESSURE  0xD0
 
@@ -179,7 +177,7 @@ int8_t readEncoder()
     static int8_t enc_states[] =
     {
         0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0
-    }; // TODO use PROGMEM
+    }; // TODO use PROGMEM (sure?)
     static uint8_t old_AB = 0;
     old_AB <<= 2; // remember previous state
     old_AB |= (ENC_PORT & 0x03); // add current state
@@ -190,7 +188,7 @@ void setMode(uint8_t m)
 {
     #if DEBUG
     if (mode != m)
-    debugSerial << "SET_MODE:FROM:" << mode << ":TO:" << m;
+        debugSerial << "SET_MODE:FROM:" << mode << ":TO:" << m;
     #endif
     mode = m;
 }
@@ -207,15 +205,14 @@ void onStateClick()
     {
         // toggle
         config.thru = !config.thru;
-
         switch (config.thru)
         {
             case true:
-            ledLeft.notify(BICOLOR_GREEN, 333, true);
-            break;
+                ledLeft.notify(BICOLOR_GREEN, 333, true);
+                break;
             case false:
-            ledLeft.notify(BICOLOR_RED, 333, true);
-            break;
+                ledLeft.notify(BICOLOR_RED, 333, true);
+                break;
         }
         #if DEBUG
         debugSerial << "THRU:" << config.thru;
@@ -226,9 +223,9 @@ void onStateClick()
         switch (intState)
         {
             case STATUS_STOP:
-            nextIntState = STATUS_START;
-            ledRight.notify(BICOLOR_YELLOW, 150, true);
-            break;
+                nextIntState = STATUS_START;
+                ledRight.notify(BICOLOR_YELLOW, 150, true);
+                break;
         }
     }
     else
@@ -240,7 +237,7 @@ void onStateClick()
                 // running, stop
                 nextIntState = STATUS_STOP;
                 break;
-                case STATUS_STOP:
+            case STATUS_STOP:
                 nextIntState = STATUS_CONTINUE;
                 break;
         }
@@ -253,9 +250,9 @@ void onTempoClick()
     {
         case CLOCK_INTERNAL:
             static uint8_t tapCounter = 0;
-            static uint32_t lastTapTime;
-            static uint32_t tapTimer;
-            static uint32_t tapTimeout;
+            static uint32_t lastTapTime = 0;
+            static uint32_t tapTimer = 0 ;
+            static uint32_t tapTimeout = 0;
 
             // check for timer timeout
             if (micros() > tapTimeout)
@@ -297,9 +294,9 @@ void onTempoClick()
             cpqnInt = cpqnExt;
             if (extState > 0)
                 nextIntState = extState; // TODO CHECK
-                ledRight.setColor(0);
-                break;
-                case CLOCK_SYNC:
+            ledRight.setColor(0);
+            break;
+        case CLOCK_SYNC:
             // change mode
             setMode(CLOCK_INTERNAL);
             ledLeft.setColor(0);
@@ -350,10 +347,9 @@ setup()
 
     // copy values
     if (config.state == STATUS_CONTINUE)
-    nextIntState = STATUS_START;
+        nextIntState = STATUS_START;
     else
-    nextIntState = config.state;
-
+        nextIntState = config.state;
     cycleTime = config.cycle;
 
     // initialize
@@ -364,6 +360,7 @@ setup()
     colorLeft = BICOLOR_RED;
     setMode(CLOCK_INTERNAL);
 
+    // MIDI you, MIDI me, everybody MIDI MIDI
     MIDI.begin();
     MIDI.turnThruOff();
 
@@ -389,7 +386,7 @@ setup()
     analogWrite(LED_D, 0);
     delay(150);
 
-    // end of setup() - disable board led
+    // end of setup() - disable board led (oldschool diag)
     digitalWriteFast(BOARD_LED, LOW);
 }
 
@@ -400,7 +397,7 @@ loop()
     {
         case CLOCK_INTERNAL:
         case CLOCK_EXTERNAL:
-            // time to clock?
+            // time to clock? (kudos to KLF)
             if ((micros() - intTime) > cycleTime)
             {
                 MIDI.sendRealTime(midi::Clock);
@@ -422,17 +419,14 @@ loop()
             break;
     }
 
-    uint32_t diff;
-
-    if (MIDI.read()) // Is there a MIDI message incoming ?
+    uint32_t diff; // if feel alone here
+    if (MIDI.read())
     {
         uint8_t command = MIDI.getType();
-
         #if DEBUG
         debugSerial << "MIDI:COMMAND:" << command << " " << endl;
         #endif
-
-        switch(command) // Get the type of the message we caught
+        switch(command)
         {
             case midi::Stop:
                 if (mode == CLOCK_SYNC)
@@ -466,10 +460,9 @@ loop()
                 break;
 
             case midi::Clock:
-                diff = micros() - extTime; // TODO optimize
+                diff = micros() - extTime; // TODO optimize (for what?)
                 if (diff > 0)
                    cycleTimeExt = (uint32_t)cycleTimeExtFilter.reading(diff);
-                //cycleTimeExt = diff;
                 extTime = micros();
                 cpqnExt++;
                 switch (mode)
@@ -481,11 +474,11 @@ loop()
                             cpqnExt = 0;
                         }
                         else if (cpqnExt == config.cpqn / 2)
-                        ledLeft.setColor(0);
+                            ledLeft.setColor(0);
                         break;
-                        case CLOCK_SYNC:
-                        MIDI.sendRealTime(midi::Clock);
 
+                    case CLOCK_SYNC:
+                        MIDI.sendRealTime(midi::Clock);
                         if (cpqnExt == config.cpqn)
                         {
                             digitalWriteFast(GATE_PIN, HIGH);
@@ -499,15 +492,13 @@ loop()
                             ledLeft.setColor(0);
                             ledRight.setColor(0);
                         }
-                    break;
+                        break;
                 }
                 break;
-            break;
-
+            break; // C syntax looks like dancing
             default:
                 break;
         }
-
         if ((micros() - extTime > CLOCK_DETECTION_WINDOW))
         {
             extTime = 0;
@@ -531,13 +522,11 @@ loop()
     {
         uint16_t inc;
         // TODO add acceleration curve feature
-        if (tempoButton.isHold()) // TODO constant
+        if (tempoButton.isHold())
             inc = 500; // TODO constant
         else
             inc = 10; // TODO constant
-
         counter += encData;
-
         switch (mode)
         {
             case CLOCK_INTERNAL:
@@ -572,17 +561,17 @@ loop()
         switch (nextIntState)
         {
             case STATUS_STOP:
-            MIDI.sendRealTime(midi::Start);
-            colorRight = BICOLOR_RED;
-            break;
+                MIDI.sendRealTime(midi::Start);
+                colorRight = BICOLOR_RED;
+                break;
             case STATUS_START:
-            MIDI.sendRealTime(midi::Stop);
-            colorRight = BICOLOR_GREEN;
-            break;
+                MIDI.sendRealTime(midi::Stop);
+                colorRight = BICOLOR_GREEN;
+                break;
             case STATUS_CONTINUE:
-            MIDI.sendRealTime(midi::Continue);
-            colorRight = BICOLOR_GREEN;
-            break;
+                MIDI.sendRealTime(midi::Continue);
+                colorRight = BICOLOR_GREEN;
+                break;
         }
         #if DEBUG
         debugSerial << "INT_STATE:FROM:" << intState << ":TO:" << nextIntState << endl;
@@ -595,8 +584,8 @@ loop()
     tempoButton.listen();
     stateButton.listen();
 
-    if(stateButton.isPressed()) onStateClick();
-    // if(tempoButton.isPressed()) onTempoClick();
+    if(stateButton.isPressed()) onStateClick(); // TODO is that better than a call back?
+    // if(tempoButton.isPressed()) onTempoClick(); // TODO yeah
 
     // led library
     ledLeft.drive();
