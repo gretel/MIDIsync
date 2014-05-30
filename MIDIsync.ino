@@ -80,7 +80,7 @@ struct config_t
     uint8_t state;
     uint8_t cpqn;
     uint8_t thru;
-    } config;
+} config;
 
 // variables
 uint8_t mode; // TODO struct
@@ -109,6 +109,7 @@ SoftwareSerial debugSerial(DEBUG_RX, DEBUG_TX);
 movingAvg profilingFilter;
 uint32_t debugTime;
 uint32_t loopCycle;
+
 void printDiag()
 {
     const uint16_t duration = micros() - loopCycle;
@@ -196,30 +197,30 @@ void setMode(uint8_t m)
 
 void onStateClick()
 {
-    // if (tempoButton.isHold())
-    // {
-    //     writeConfig();
-    //     return;
-    // }
-    // // TODO might be worth to have some tuning here
-    // if (stateButton.isHold())
-    // {
-    //     // toggle
-    //     config.thru = !config.thru;
+    if (tempoButton.isHold())
+    {
+        writeConfig();
+        return;
+    }
+    // TODO might be worth to have some tuning here
+    if (stateButton.isHold())
+    {
+        // toggle
+        config.thru = !config.thru;
 
-    //     switch (config.thru)
-    //     {
-    //         case true:
-    //         ledLeft.notify(BICOLOR_GREEN, 333, true);
-    //         break;
-    //         case false:
-    //         ledLeft.notify(BICOLOR_RED, 333, true);
-    //         break;
-    //     }
-    //     #if DEBUG
-    //     debugSerial << "THRU:" << config.thru;
-    //     #endif
-    // }
+        switch (config.thru)
+        {
+            case true:
+            ledLeft.notify(BICOLOR_GREEN, 333, true);
+            break;
+            case false:
+            ledLeft.notify(BICOLOR_RED, 333, true);
+            break;
+        }
+        #if DEBUG
+        debugSerial << "THRU:" << config.thru;
+        #endif
+    }
     if (stateButton.isHold())
     {
         switch (intState)
@@ -242,88 +243,69 @@ void onStateClick()
                 case STATUS_STOP:
                 nextIntState = STATUS_CONTINUE;
                 break;
-            }
         }
     }
+}
 
-    void onTempoClick()
+void onTempoClick()
+{
+    switch (mode)
     {
-        switch (mode)
-        {
-            case CLOCK_INTERNAL:
-                static uint8_t tapCounter = 0;
-                static uint32_t lastTapTime;
-                static uint32_t tapTimer;
-                static uint32_t tapTimeout;
+        case CLOCK_INTERNAL:
+            static uint8_t tapCounter = 0;
+            static uint32_t lastTapTime;
+            static uint32_t tapTimer;
+            static uint32_t tapTimeout;
 
-                // check for timer timeout
-                if (micros() > tapTimeout)
+            // check for timer timeout
+            if (micros() > tapTimeout)
+            {
+                // restart tap counter
+                tapTimeFilter.reset();
+                tapCounter = 1;
+                // give feedback
+                ledLeft.notify(BICOLOR_YELLOW, 75, true);
+            }
+            else
+            {
+                // calculate
+                tapCounter++;
+                tapTimer = micros() - lastTapTime;
+                //lastTapTime = micros();
+                const uint32_t tapCycle = tapTimeFilter.reading(tapTimer);
+                if (tapCounter >= 4)
                 {
-                    // restart tap counter
-                    tapTimeFilter.reset();
-                    tapCounter = 1;
+                    // set new cycle time
+                    // TODO ensure minimum/maximum
+                    cycleTime = tapCycle / config.cpqn;
+                    // give feedback
+                    ledLeft.notify(BICOLOR_YELLOW, 75, true);
+                    ledRight.notify(BICOLOR_YELLOW, 75, true);
+                }
+                else
                     // give feedback
                     ledLeft.notify(BICOLOR_YELLOW, 75, true);
                 }
-                else
-                {
-                    // calculate
-                    tapCounter++;
-                    tapTimer = micros() - lastTapTime;
-                    //lastTapTime = micros();
-                    const uint32_t tapCycle = tapTimeFilter.reading(tapTimer);
-                    if (tapCounter >= 4)
-                    {
-                        // set new cycle time
-                        // TODO ensure minimum/maximum
-                        cycleTime = tapCycle / config.cpqn;
-                        // give feedback
-                        ledLeft.notify(BICOLOR_YELLOW, 75, true);
-                        ledRight.notify(BICOLOR_YELLOW, 75, true);
-                    }
-                    else
-                        // give feedback
-                        ledLeft.notify(BICOLOR_YELLOW, 75, true);
-                    }
-                // store current time
-                lastTapTime = micros();
-                tapTimeout = micros() + (config.cpqn * 100000);
+            // store current time
+            lastTapTime = micros();
+            tapTimeout = micros() + (config.cpqn * 100000);
+            break;
+        case CLOCK_EXTERNAL:
+            // change mode
+            setMode(CLOCK_SYNC);
+            // copy
+            cpqnInt = cpqnExt;
+            if (extState > 0)
+                nextIntState = extState; // TODO CHECK
+                ledRight.setColor(0);
                 break;
-            case CLOCK_EXTERNAL:
-                // change mode
-                setMode(CLOCK_SYNC);
-                // copy
-                cpqnInt = cpqnExt;
-                if (extState > 0)
-                    nextIntState = extState; // TODO CHECK
-                    ledRight.setColor(0);
-                    break;
-                    case CLOCK_SYNC:
-                // change mode
-                setMode(CLOCK_INTERNAL);
-                ledLeft.setColor(0);
-                break;
-        }
+                case CLOCK_SYNC:
+            // change mode
+            setMode(CLOCK_INTERNAL);
+            ledLeft.setColor(0);
+            break;
     }
-
-    uint8_t messageAvailable()
-    {
-        const uint8_t avail = MIDI_PORT.available();
-        switch (avail) {
-            case 1 ... 8:                       // digits 0-8 (0 & 9 not used)
-              // stuff
-              break;
-      }
-
-      if (avail > 0 && config.thru)
-      {
-        #if DEBUG
-        debugSerial << "MIDI:THRU:" << avail << endl;
-        #endif
-        MIDI_PORT.write(MIDI_PORT.peek());
-    }
-    return avail;
-    }
+}
 
 extern void __attribute__((noreturn))
 setup()
@@ -371,6 +353,7 @@ setup()
     nextIntState = STATUS_START;
     else
     nextIntState = config.state;
+
     cycleTime = config.cycle;
 
     // initialize
@@ -381,8 +364,8 @@ setup()
     colorLeft = BICOLOR_RED;
     setMode(CLOCK_INTERNAL);
 
-    // enable midi communication
-    MIDI_PORT.begin(MIDI_BPS);
+    MIDI.begin();
+    MIDI.turnThruOff();
 
     // fancy led test effect
     uint8_t val = 0;
@@ -420,8 +403,7 @@ loop()
             // time to clock?
             if ((micros() - intTime) > cycleTime)
             {
-                MIDI_PORT.write(STATUS_SYNC);
-                //                MIDI_PORT.flush();
+                MIDI.sendRealTime(midi::Clock);
                 // store current time
                 intTime = micros();
                 // clocks per quarter note
@@ -438,27 +420,61 @@ loop()
                 }
             }
             break;
-        }
+    }
 
-        uint32_t diff;
-        while (messageAvailable() > 0)
+    uint32_t diff;
+
+    if (MIDI.read()) // Is there a MIDI message incoming ?
+    {
+        uint8_t command = MIDI.getType();
+
+        #if DEBUG
+        debugSerial << "MIDI:COMMAND:" << command << " " << endl;
+        #endif
+
+        switch(command) // Get the type of the message we caught
         {
-            const uint8_t command = MIDI_PORT.read() & B11110000;
-            #if DEBUG
-            debugSerial << "MIDI:COMMAND:" << command << " " << endl;
-            #endif
-            switch (command)
-            {
-                case STATUS_SYNC:
+            case midi::Stop:
+                if (mode == CLOCK_SYNC)
+                {
+                    nextIntState = command;
+                    colorRight = BICOLOR_RED;
+                }
+                extState = command;
+                colorLeft = BICOLOR_RED;
+                ledLeft.notify(BICOLOR_RED, 200, true);
+                break;
+            case STATUS_START:
+                if (mode == CLOCK_SYNC)
+                {
+                    nextIntState = command;
+                    colorRight = BICOLOR_GREEN;
+                }
+                extState = command;
+                colorLeft = BICOLOR_GREEN;
+                ledLeft.notify(BICOLOR_YELLOW, 200, true);
+                break;
+            case STATUS_CONTINUE:
+                if (mode == CLOCK_SYNC)
+                {
+                    colorRight = BICOLOR_GREEN;
+                    nextIntState = command;
+                }
+                extState = command;
+                colorLeft = BICOLOR_GREEN;
+                ledLeft.notify(BICOLOR_GREEN, 200, true);
+                break;
+
+            case midi::Clock:
                 diff = micros() - extTime; // TODO optimize
                 if (diff > 0)
-                cycleTimeExt = (uint32_t)cycleTimeExtFilter.reading(diff);
-                    //cycleTimeExt = diff;
-                    extTime = micros();
-                    cpqnExt++;
-                    switch (mode)
-                    {
-                        case CLOCK_EXTERNAL:
+                   cycleTimeExt = (uint32_t)cycleTimeExtFilter.reading(diff);
+                //cycleTimeExt = diff;
+                extTime = micros();
+                cpqnExt++;
+                switch (mode)
+                {
+                    case CLOCK_EXTERNAL:
                         if (cpqnExt == config.cpqn)
                         {
                             ledLeft.setColor(colorLeft, true);
@@ -468,8 +484,8 @@ loop()
                         ledLeft.setColor(0);
                         break;
                         case CLOCK_SYNC:
-                        MIDI_PORT.write(STATUS_SYNC);
-                        //                        MIDI_PORT.flush();
+                        MIDI.sendRealTime(midi::Clock);
+
                         if (cpqnExt == config.cpqn)
                         {
                             digitalWriteFast(GATE_PIN, HIGH);
@@ -483,48 +499,23 @@ loop()
                             ledLeft.setColor(0);
                             ledRight.setColor(0);
                         }
-                        break;
-                    }
-                    break;
-                    case STATUS_STOP:
-                    if (mode == CLOCK_SYNC)
-                    {
-                        nextIntState = command;
-                        colorRight = BICOLOR_RED;
-                    }
-                    extState = command;
-                    colorLeft = BICOLOR_RED;
-                    ledLeft.notify(BICOLOR_RED, 200, true);
-                    break;
-                    case STATUS_START:
-                    if (mode == CLOCK_SYNC)
-                    {
-                        nextIntState = command;
-                        colorRight = BICOLOR_GREEN;
-                    }
-                    extState = command;
-                    colorLeft = BICOLOR_GREEN;
-                    ledLeft.notify(BICOLOR_YELLOW, 200, true);
-                    break;
-                    case STATUS_CONTINUE:
-                    if (mode == CLOCK_SYNC)
-                    {
-                        colorRight = BICOLOR_GREEN;
-                        nextIntState = command;
-                    }
-                    extState = command;
-                    colorLeft = BICOLOR_GREEN;
-                    ledLeft.notify(BICOLOR_GREEN, 200, true);
                     break;
                 }
-            }
-            if ((micros() - extTime > CLOCK_DETECTION_WINDOW))
-            {
-                extTime = 0;
-                cpqnExt = 0;
-                setMode(CLOCK_INTERNAL);
-                ledLeft.setColor(0);
-            }
+                break;
+            break;
+
+            default:
+                break;
+        }
+
+        if ((micros() - extTime > CLOCK_DETECTION_WINDOW))
+        {
+            extTime = 0;
+            cpqnExt = 0;
+            setMode(CLOCK_INTERNAL);
+            ledLeft.setColor(0);
+        }
+    }
     else if (extTime > 0) // TODO logic expression
     {
         if (mode == CLOCK_INTERNAL)
@@ -533,8 +524,6 @@ loop()
             colorLeft = BICOLOR_YELLOW;
         }
     }
-
-    MIDI_PORT.flush();
 
     static int8_t counter;
     int8_t encData = readEncoder();
@@ -549,48 +538,49 @@ loop()
 
         counter += encData;
 
-            switch (mode)
+        switch (mode)
+        {
+            case CLOCK_INTERNAL:
+            case CLOCK_EXTERNAL:
+            // TODO fix logic (UP/DOWN flag)
+            switch (counter)
             {
-                case CLOCK_INTERNAL:
-                case CLOCK_EXTERNAL:
-                // TODO fix logic (UP/DOWN flag)
-                switch (counter)
-                {
-                    case 4:
-                        counter = 0;
-                        if (cycleTime < 70000)
-                        {
-                            cycleTime += inc; // TODO acceleration
-                            ledLeft.notify(BICOLOR_RED, 25, true);
-                        }
-                        break;
-                    case -4:
-                        counter = 0;
-                        if (cycleTime > 9000)
-                        {
-                            cycleTime -= inc; // TODO acceleration
-                            ledLeft.notify(BICOLOR_GREEN, 25, true);
-                        }
-                        break;
+                case 4:
+                    counter = 0;
+                    if (cycleTime < 70000)
+                    {
+                        cycleTime += inc; // TODO acceleration
+                        ledLeft.notify(BICOLOR_RED, 25, true);
                     }
                     break;
-                }
+                case -4:
+                    counter = 0;
+                    if (cycleTime > 9000)
+                    {
+                        cycleTime -= inc; // TODO acceleration
+                        ledLeft.notify(BICOLOR_GREEN, 25, true);
+                    }
+                    break;
             }
+            break;
+        }
+    }
+
     // compare
     if (intState != nextIntState)
     {
         switch (nextIntState)
         {
             case STATUS_STOP:
-            MIDI_PORT.write(STATUS_STOP);
+            MIDI.sendRealTime(midi::Start);
             colorRight = BICOLOR_RED;
             break;
             case STATUS_START:
-            MIDI_PORT.write(STATUS_START);
+            MIDI.sendRealTime(midi::Stop);
             colorRight = BICOLOR_GREEN;
             break;
             case STATUS_CONTINUE:
-            MIDI_PORT.write(STATUS_CONTINUE);
+            MIDI.sendRealTime(midi::Continue);
             colorRight = BICOLOR_GREEN;
             break;
         }
@@ -606,11 +596,12 @@ loop()
     stateButton.listen();
 
     if(stateButton.isPressed()) onStateClick();
-    if(tempoButton.isPressed()) onTempoClick();
+    // if(tempoButton.isPressed()) onTempoClick();
 
     // led library
     ledLeft.drive();
     ledRight.drive();
+
     #if DEBUG
     if ((millis() - debugTime) > DEBUG_INTERVAL)
     {
