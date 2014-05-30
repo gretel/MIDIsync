@@ -1,0 +1,49 @@
+#######################################
+# Syntax Coloring Map For Test
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Button	                KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+listen	                KEYWORD2
+isReleased	            KEYWORD2
+isPressed	            KEYWORD2
+isReleased	            KEYWORD2
+isPressed	            KEYWORD2
+onChange	            KEYWORD2
+onPress	                KEYWORD2
+onRelease	            KEYWORD2
+getPressCount           KEYWORD2
+clearPressCount         KEYWORD2  
+getReleaseCount         KEYWORD2
+clearReleaseCount       KEYWORD2
+onPressAsToggle         KEYWORD2
+onReleaseAsToggle       KEYWORD2
+onDoubleClick	        KEYWORD2
+getDoubleClickDelay	    KEYWORD2
+setDoubleClickDelay	    KEYWORD2
+getDebounceDelay	    KEYWORD2
+setDebounceDelay	    KEYWORD2
+clearDebounceDelay	    KEYWORD2
+onPressAsToggle         KEYWORD2
+onHold                  KEYWORD2
+isHold                  KEYWORD2
+getHoldDelay	    KEYWORD2
+setHoldDelay	    KEYWORD2
+#getRegisterValue	    KEYWORD2
+
+######################################
+# Instances (KEYWORD2)
+#######################################
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
