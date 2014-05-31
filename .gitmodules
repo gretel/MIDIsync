@@ -1,9 +1,6 @@
 [submodule "libraries/movingAvg"]
 	path = libraries/movingAvg
 	url = git@github.com:gretel/movingAvg.git
-[submodule "libraries/digitalIOPerformance"]
-	path = libraries/digitalIOPerformance
-	url = https://github.com/projectgus/digitalIOPerformance.git
 [submodule "libraries/bicolorled"]
 	path = libraries/bicolorled
 	url = https://github.com/wolfgang42/bicolorled.git
@@ -13,3 +10,6 @@
 [submodule "libraries/arduino_midi_library"]
 	path = libraries/arduino_midi_library
 	url = https://github.com/FortySevenEffects/arduino_midi_library.git
+[submodule "libraries/digitalIOPerformance"]
+	path = libraries/digitalIOPerformance
+	url = https://github.com/projectgus/digitalIOPerformance.git
