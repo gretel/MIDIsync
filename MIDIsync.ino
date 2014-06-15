@@ -38,6 +38,7 @@
 #include "Button.h"
 // https://github.com/FortySevenEffects/arduino_midi_library
 #include "MIDI.h"
+MIDI_CREATE_DEFAULT_INSTANCE();
 
 // hardware
 #define BOARD_LED 13
