@@ -30,3 +30,5 @@ My devices running it (nicknamed "Hensel MODEL-01") have the following features:
 	- Energy-efficient power supply included
 
 During development i decided to have some features not for the sake of stability. These are shown ~~strikethrough~~.
+
+**Libraries are not included right now, going to add them as submodules.**
