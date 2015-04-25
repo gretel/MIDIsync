@@ -8,9 +8,7 @@ At least running on
 - Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno (.hex binary provided, and platform of test)
 
 Should be compatible with MIDI-Shield from Sparkfun (https://www.sparkfun.com/products/9595).
-
 Schematics and stuff are work in progress. Hang on :)
-
 My devices running it (nicknamed "Hensel MODEL-01") have the following features:
 
 - High-precision Master Clock
@@ -30,3 +28,5 @@ My devices running it (nicknamed "Hensel MODEL-01") have the following features:
 - Tolerant power input (7-12V DC) and hardware power switch
 	- Low-power design, runs on batteries and USB-power (adapter required)
 	- Energy-efficient power supply included
+
+During development i decided to have some features not for the sake of stability. These are shown ~~strikethrough~~.
