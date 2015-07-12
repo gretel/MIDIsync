@@ -32,3 +32,6 @@ My devices running it (nicknamed "Hensel MODEL-01") have the following features:
 During development i decided to have some features not for the sake of stability. These are shown ~~strikethrough~~.
 
 **Libraries are not included right now, going to add them as submodules.**
+
+
+[![Join the chat at https://gitter.im/gretel/MIDIsync](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gretel/MIDIsync?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
