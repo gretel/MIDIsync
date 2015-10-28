@@ -210,7 +210,7 @@ void awaitRelease()
     do
     {
         // wait for buttons to be released so we can finally get on
-        delay(100);
+        delay(50);
         transportButton.read();
         tempoButton.read();
     }
@@ -225,7 +225,7 @@ void writeEprom()
     digitalWriteFast(BOARD_LED, HIGH);
     // actually write
     eeprom_write_block((const void*)&config, (void*)0, sizeof(config));
-    delay(100); // paranoia
+    delay(50); // paranoia
     digitalWriteFast(BOARD_LED, LOW);
 }
 
@@ -341,7 +341,7 @@ void s_halt_enter()
 void s_halt_exit()
 {
     midi_if.sendRealTime(midi::TuneRequest);
-    delay(100);
+    delay(50);
 }
 
 void s_stop_enter()
@@ -595,7 +595,7 @@ loop()
                             setState(STATE_STOP);
                             break;
                         case STATE_STOP:
-                            setState(STATE_START);
+                            setState(STATE_CONTINUE);
                             break;
                     }
                     // reset context
@@ -610,7 +610,7 @@ loop()
                 switch(state)
                 {
                     case STATE_STOP:
-                        setState(STATE_CONTINUE);
+                        setState(STATE_START);
                         break;
                     case STATE_START:
                     case STATE_CONTINUE:
