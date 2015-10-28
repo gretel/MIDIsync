@@ -14,8 +14,11 @@
 	path = lib/Streaming
 	url = https://github.com/scottdky/Streaming.git
 [submodule "lib/StackArray"]
-  path = lib/StackArray
-  url = https://github.com/oogre/StackArray.git
+	path = lib/StackArray
+	url = https://github.com/oogre/StackArray.git
 [submodule "lib/LEDFader"]
-  path = lib/LEDFader
-  url = https://github.com/jgillick/arduino-LEDFader.git
+	path = lib/LEDFader
+	url = https://github.com/jgillick/arduino-LEDFader.git
+[submodule "lib/Fsm"]
+	path = lib/Fsm
+	url = https://github.com/jonblack/arduino-fsm
