@@ -1,15 +1,21 @@
-[submodule "libraries/movingAvg"]
-	path = libraries/movingAvg
-	url = git@github.com:gretel/movingAvg.git
-[submodule "libraries/bicolorled"]
-	path = libraries/bicolorled
-	url = https://github.com/wolfgang42/bicolorled.git
-[submodule "libraries/Arduino-Library-Button"]
-	path = libraries/Arduino-Library-Button
-	url = https://github.com/carlynorama/Arduino-Library-Button.git
-[submodule "libraries/arduino_midi_library"]
-	path = libraries/arduino_midi_library
+[submodule "lib/Average"]
+  path = lib/Average
+  url = https://github.com/MajenkoLibraries/Average.git
+[submodule "lib/Button"]
+	path = lib/Button
+	url = https://github.com/JChristensen/Button.git
+[submodule "lib/digitalWriteFast"]
+  path = lib/digitalWriteFast
+  url = https://github.com/mpflaga/Arduino-digitalWriteFast.git
+[submodule "lib/MIDI"]
+	path = lib/MIDI
 	url = https://github.com/FortySevenEffects/arduino_midi_library.git
-[submodule "libraries/digitalIOPerformance"]
-	path = libraries/digitalIOPerformance
-	url = https://github.com/projectgus/digitalIOPerformance.git
+[submodule "lib/Streaming"]
+	path = lib/Streaming
+	url = https://github.com/scottdky/Streaming.git
+[submodule "lib/StackArray"]
+  path = lib/StackArray
+  url = https://github.com/oogre/StackArray.git
+[submodule "lib/LEDFader"]
+  path = lib/LEDFader
+  url = https://github.com/jgillick/arduino-LEDFader.git
