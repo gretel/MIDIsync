@@ -633,7 +633,7 @@ loop()
     }
 
     // check if somebody is knocking on the midi input
-    if (midi_if.read())
+    if (state != STATE_HALT && midi_if.read())
     {
         // yep, watcha want
         const uint8_t command = midi_if.getType();
