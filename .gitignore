@@ -1,5 +1,6 @@
-.DS_Store
-/.dep
-/.lib
-/*.o
 *.sublime-*
+.DS_Store
+.pioenvs
+.sconsign.dblite
+/*.o
+lib
