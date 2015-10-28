@@ -8,7 +8,7 @@
 
 // id
 #define ID "HENSEL_CLOCK-01"
-#define VERSION 2504201501
+#define VERSION 2810201501
 #define DEBUG 0
 
 // TODO: description
@@ -21,29 +21,35 @@
 #define ENC_PORT PINC
 #define GATE_PIN 8
 #define BOARD_LED 13
+
 #define LED_A 5
 #define LED_B 6
 #define LED_C 9
 #define LED_D 10
 
+
 // button debounce time
-#define BTN_DBNC 25
+#define BTN_DBNC 30
 // button hold threshold
-#define BTN_HOLD_THRESH 220
+#define BTN_HOLD_THRESH 256
+
 // each encoder click corresponds to a value
-#define ENCODER_VAL 16
+#define ENCODER_VAL 12
 // when pushed down (shif)
 #define ENCODER_VAL_SHIFT 96
-// min/max cycle duration
-#define CYCLE_TIME_MIN 7200
-#define CYCLE_TIME_MAX 115200
+
 // number of data points
-#define TAP_FILTER_POINTS 8
+#define TAP_FILTER_POINTS 16
 // time window to count beats as subsequent
-#define TAP_WINDOW 2000000
+#define TAP_WINDOW 1944000
+
+// min/max cycle duration
+#define CYCLE_TIME_MIN 6750
+#define CYCLE_TIME_MAX 129600
+
 // TODO: add comments
 #define DEFAULT_CPQN 24
-#define DEFAULT_CYCLE_TIME 20000
+#define DEFAULT_CYCLE_TIME 24300
 #define DEFAULT_MIDI_CH 9
 
 #if DEBUG
@@ -85,6 +91,7 @@ struct MidiSettings : public midi::DefaultSettings
 {
    static const bool UseRunningStatus = false;
    static const bool Use1ByteParsing = true;
+   static const unsigned SysExMaxSize = 2;
 
 };
 // instantiate interface
@@ -100,19 +107,24 @@ uint8_t state;
 // the state the machine will change to during the next cycle
 uint8_t nextState;
 // definiton of states
-enum states_t { STATE_HALT, STATE_STOP, STATE_START, STATE_CONTINUE };
-State state_halt(STATE_HALT, &s_halt_enter, NULL);
-State state_stop(STATE_STOP, &s_stop_enter, NULL);
-State state_start(STATE_START, &s_start_enter, NULL);
-State state_continue(STATE_CONTINUE, &s_continue_enter, NULL);
-Fsm machine(&state_stop);
+#define STATE_HALT 0
+#define STATE_STOP 1
+#define STATE_START 2
+#define STATE_CONTINUE 3
+// declaration of states
+State state_halt(s_halt_enter, &s_halt_exit);
+State state_stop(s_stop_enter, NULL);
+State state_start(s_start_enter, NULL);
+State state_continue(s_continue_enter, NULL);
+
+Fsm machine(&state_halt);
 
 // this data is going to saved to and loaded from the EEPROM
 struct config_t
 {
     uint32_t version;
     uint32_t cycle;
-    uint8_t autostart;
+    uint8_t state;
     uint8_t cpqn;
 } config;
 
@@ -205,9 +217,9 @@ void awaitRelease()
 
 void writeEprom()
 {
-    #if DEBUG
+#if DEBUG
     debugSerial << "WRITE_EPROM" << endl;
-    #endif
+#endif
     digitalWriteFast(BOARD_LED, HIGH);
     // actually write
     eeprom_write_block((const void*)&config, (void*)0, sizeof(config));
@@ -217,20 +229,20 @@ void writeEprom()
 
 void resetConfig()
 {
-    #if DEBUG
+#if DEBUG
     debugSerial << "RESET_CONFIG" << endl;
-    #endif
+#endif
     // initialize configuration structure
     config.version = (uint32_t)VERSION;
     config.cpqn = (uint8_t)DEFAULT_CPQN;
     config.cycle = (uint32_t)DEFAULT_CYCLE_TIME;
-    config.autostart = STATE_STOP;
+    config.state = (uint8_t)STATE_STOP;
     writeEprom();
 }
 
 void saveConfig()
 {
-    config.version = (uint32_t)VERSION;
+    config.version = VERSION;
     config.cpqn = cpqn;
     config.cycle = cycle;
     // enforce valid state so we won't hang on startup
@@ -238,15 +250,15 @@ void saveConfig()
     {
         case STATE_START:
         case STATE_CONTINUE:
-            config.autostart = STATE_START;
+            config.state = STATE_START;
             break;
         default:
-            config.autostart = STATE_STOP;
+            config.state = STATE_STOP;
             break;
     }
-    #if DEBUG
-    debugSerial << "SAVE_CONFIG:VERSION => " << config.version << " AUTOSTART => " << config.autostart << " CPQN =>" << config.cpqn << " CYCLE => " << config.cycle << endl;
-    #endif
+#if DEBUG
+    debugSerial << "SAVE_CONFIG:VERSION => " << config.version << " AUTOSTART => " << config.state << " CPQN =>" << config.cpqn << " CYCLE => " << config.cycle << endl;
+#endif
     writeEprom();
 }
 
@@ -254,9 +266,9 @@ void loadConfig()
 {
     // read configuration
     eeprom_read_block((void*)&config, (void*)0, sizeof(config));
-    #if DEBUG
-    debugSerial << "LOAD_CONFIG:VERSION => " << config.version << " AUTOSTART => " << config.autostart << " CPQN =>" << config.cpqn << " CYCLE => " << config.cycle << endl;
-    #endif
+#if DEBUG
+    debugSerial << "LOAD_CONFIG:VERSION => " << config.version << " AUTOSTART => " << config.state << " CPQN =>" << config.cpqn << " CYCLE => " << config.cycle << endl;
+#endif
 }
 
 /* http://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino
@@ -275,18 +287,18 @@ int8_t readEncoder()
 
 void setState(uint8_t s)
 {
-    #if DEBUG
+#if DEBUG
     debugSerial << "SET_STATE:" << s << endl;
-    #endif
+#endif
     nextState = s;
 }
 
 void setCycle(uint32_t t)
 {
     t = constrain(t, CYCLE_TIME_MIN, CYCLE_TIME_MAX);
-    #if DEBUG
+#if DEBUG
     debugSerial << "SET_CYCLE:" << cycle << "=>" << t << endl;
-    #endif
+#endif
     cycle = t;
 }
 
@@ -322,6 +334,12 @@ void s_halt_enter()
     queueLight(ACT_PUSH, LED_LEFT_B, 0, 100);
     queueLight(ACT_PUSH, LED_RIGHT_A, 220, 150);
     queueLight(ACT_PUSH, LED_RIGHT_B, 0, 100);
+}
+
+void s_halt_exit()
+{
+    midi_if.sendRealTime(midi::TuneRequest);
+    delay(100);
 }
 
 void s_stop_enter()
@@ -364,14 +382,14 @@ setup()
     digitalWriteFast(ENC_B, HIGH);
     pinMode(GATE_PIN, OUTPUT);
 
-    #if DEBUG
+#if DEBUG
     // setup secondary serial
     pinMode(DEBUG_RX, INPUT);
     pinMode(DEBUG_TX, OUTPUT);
     debugSerial.begin(DEBUG_SPEED);
     // identifcation please
     debugSerial << ID << ":" << VERSION << endl;
-    #endif
+#endif
 
     // setup each LED
     for (uint8_t i = 0; i < LED_NUM; i++) {
@@ -381,13 +399,13 @@ setup()
     };
 
     // setup state transitions
-    machine.add_transition(&state_start, &state_stop,    STATE_STOP, NULL);
-    machine.add_transition(&state_continue, &state_stop, STATE_STOP, NULL);
-    machine.add_transition(&state_halt, &state_stop,     STATE_STOP, NULL);
-    machine.add_transition(&state_start, &state_halt,    STATE_HALT, NULL);
-    machine.add_transition(&state_continue, &state_halt, STATE_HALT, NULL);
-    machine.add_transition(&state_stop, &state_start,    STATE_START, NULL);
-    machine.add_transition(&state_stop, &state_continue, STATE_CONTINUE, NULL);
+    machine.add_transition(&state_start,    &state_stop,     STATE_STOP, NULL);
+    machine.add_transition(&state_continue, &state_stop,     STATE_STOP, NULL);
+    machine.add_transition(&state_halt,     &state_stop,     STATE_STOP, NULL);
+    machine.add_transition(&state_start,    &state_halt,     STATE_HALT, NULL);
+    machine.add_transition(&state_continue, &state_halt,     STATE_HALT, NULL);
+    machine.add_transition(&state_stop,     &state_start,    STATE_START, NULL);
+    machine.add_transition(&state_stop,     &state_continue, STATE_CONTINUE, NULL);
 
     // load configuration from non-volatile memory (5th dimensional eternity like in interstellargh)
     loadConfig();
@@ -409,19 +427,15 @@ setup()
     // 'If a Tune Request command is sent, all the MIDI instruments in the system that have a tuning routine
     // will give themselves a quick checkover and retune to their own internal reference'
     // http://www.soundonsound.com/sos/1995_articles/oct95/midibasics3.html
-    // do it and dream on
-    // TODO check for side-effects
-    midi_if.sendTuneRequest();
+    midi_if.sendRealTime(midi::TuneRequest);
 
     // copy and set
     cpqn = config.cpqn;
     setCycle(config.cycle);
     // end of setup() - disable board led (oldschool diag)
     digitalWriteFast(BOARD_LED, LOW);
-    // call enter handler of default state so we won't end up in nirvana
-    machine.enter_handler();
     // recall saved state
-    setState(config.autostart);
+    setState(config.state);
 }
 
 extern void __attribute__((noreturn))
@@ -430,9 +444,9 @@ loop()
     // will things change?
     if (state != nextState)
     {
-        #if DEBUG
+#if DEBUG
         debugSerial << "TRANSITION:" << state << "=>" << nextState << endl;
-        #endif
+#endif
         // yep, apply change
         state = nextState;
         machine.trigger(state);
@@ -580,8 +594,6 @@ loop()
                             setState(STATE_STOP);
                             break;
                         case STATE_STOP:
-                            // TODO: check for side-effects
-                            midi_if.sendSongPosition(0);
                             setState(STATE_START);
                             break;
                     }
@@ -661,7 +673,7 @@ loop()
     tempoButton.read();
     transportButton.read();
 
-    #if DEBUG
+#if DEBUG
     // output debugging stuff every few cycles
     if ((micros() - debugTime) >= DEBUG_INTERVAL)
     {
@@ -670,7 +682,7 @@ loop()
         debugTime = micros();
     }
     loopCycle = micros();
-    #endif
+#endif
 }
 
 // end
