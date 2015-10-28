@@ -11,22 +11,18 @@
 #define VERSION 2810201501
 #define DEBUG 0
 
-// TODO: description
-#define MIDI_PORT Serial
-#define MIDI_BPS 31250
-#define BTN_TEMPO 2
+// "hardware abstraction layer" :)
+#define BOARD_LED 13
 #define BTN_STATE 4
+#define BTN_TEMPO 2
 #define ENC_A 14
 #define ENC_B 15
 #define ENC_PORT PINC
 #define GATE_PIN 8
-#define BOARD_LED 13
-
 #define LED_A 5
 #define LED_B 6
 #define LED_C 9
 #define LED_D 10
-
 
 // button debounce time
 #define BTN_DBNC 30
@@ -46,11 +42,15 @@
 // min/max cycle duration
 #define CYCLE_TIME_MIN 6750
 #define CYCLE_TIME_MAX 129600
-
-// TODO: add comments
-#define DEFAULT_CPQN 24
+// default cycle time on configuration reset
 #define DEFAULT_CYCLE_TIME 24300
-#define DEFAULT_MIDI_CH 9
+
+// clocks per quarter note
+// TODO: implement different clocks
+#define DEFAULT_CPQN 24
+
+#define MIDI_PORT Serial
+#define MIDI_BPS 31250
 
 #if DEBUG
 #define DEBUG_RX 11
@@ -79,12 +79,12 @@
 // https://github.com/jgillick/arduino-LEDFader
 #include "LEDFader.h"
 #include "Curve.h"
+// https://github.com/FortySevenEffects/arduino_midi_library
+#include "MIDI.h"
 // https://github.com/oogre/StackArray
 #include "StackArray.h"
 // http://arduiniana.org/libraries/streaming/
 #include "Streaming.h"
-// https://github.com/FortySevenEffects/arduino_midi_library
-#include "MIDI.h"
 
 // MIDI library settings
 struct MidiSettings : public midi::DefaultSettings
@@ -106,6 +106,7 @@ register uint32_t cycle asm("r4");
 uint8_t state;
 // the state the machine will change to during the next cycle
 uint8_t nextState;
+
 // definiton of states
 #define STATE_HALT 0
 #define STATE_STOP 1
@@ -117,6 +118,7 @@ State state_stop(s_stop_enter, NULL);
 State state_start(s_start_enter, NULL);
 State state_continue(s_continue_enter, NULL);
 
+// initialize state machine
 Fsm machine(&state_halt);
 
 // this data is going to saved to and loaded from the EEPROM
@@ -423,7 +425,6 @@ setup()
     // MIDI you, MIDI me!
     midi_if.begin();
     midi_if.turnThruOff();
-    midi_if.setInputChannel(DEFAULT_MIDI_CH);
     // 'If a Tune Request command is sent, all the MIDI instruments in the system that have a tuning routine
     // will give themselves a quick checkover and retune to their own internal reference'
     // http://www.soundonsound.com/sos/1995_articles/oct95/midibasics3.html
@@ -648,7 +649,6 @@ loop()
             case midi::Continue:
                 setState(STATE_CONTINUE);
                 break;
-            // TODO: implement sysex
         }
     }
 
