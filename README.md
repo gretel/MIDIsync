@@ -49,6 +49,6 @@ My devices running it (nicknamed "Hensel MODEL-01") have the following features:
 	- Low-power design, runs on batteries and USB-power (adapter required)
 	- Energy-efficient power supply included
 
-Please get in touch with us on Gitter:
+Please get in touch with us on *Gitter*:
 
 [![Join the chat at https://gitter.im/gretel/MIDIsync](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gretel/MIDIsync?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
