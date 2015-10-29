@@ -7,7 +7,7 @@ At least running on
 - Arduino Duemilanove http://arduino.cc/en/Main/arduinoBoardDuemilanove
 - Arduino Uno http://arduino.cc/en/Main/arduinoBoardUno (.hex binary provided, and platform of test)
 
-Should be compatible with MIDI-Shield from Sparkfun (https://www.sparkfun.com/products/9595).
+Should be compatible with MIDI-Shield from (Sparkfun)[https://www.sparkfun.com/products/9595].
 Schematics and stuff are work in progress. Hang on :)
 My devices running it (nicknamed "Hensel MODEL-01") have the following features:
 
@@ -16,22 +16,37 @@ My devices running it (nicknamed "Hensel MODEL-01") have the following features:
 	- CV/Gate Output (0V/5V)
 - Micro-adjustable Tempo (endless rotary knob, two speeds)
 - Tap-Tempo Function (dropout protection, auto-smoothing)
-- [Supports output of 1, 12, 24 and 48 clocks per quarter note]
 - Control MIDI Equipment (start, continue, stop)
-- ~~Split-Mode - Synchronize to external MIDI Clock~~
-	- ~~Quickly toggle between both speeds (internal/external)~~
-	- ~~[Control pass-through of control messages to MIDI-OUT]~~
 - Settings can be saved in non-volatile memory
 - Jumbo Tri-Color LEDs for Tempo and Status display
 - MIDI-Thru (latency-free hardware circuit)
-- ~~[MIDI-Forward (merge MIDI-In with generated clock signals to MIDI-Out)]~~
 - Tolerant power input (7-12V DC) and hardware power switch
 	- Low-power design, runs on batteries and USB-power (adapter required)
 	- Energy-efficient power supply included
 
-During development i decided to have some features not for the sake of stability. These are shown ~~strikethrough~~.
+Libraries are included as *git submodules*. To clone the project and it's submodules please do:
 
-**Libraries are not included right now, going to add them as submodules.**
+```shell
+$ git clone https://github.com/gretel/MIDIsync.git
+$ cd MIDIsync
+$ git submodule update
+```
 
+Building and uploading can be done easily using [platformio](http://platformio.org).
+
+> Currently, `python 2.7.10` is required as well as `pip`.
+
+Please edit `platformio.ini` first to reflect your serial port.
+
+```
+# update dependent packages to the latest versions
+$ pip install -U pip setuptools
+
+# install/upgrade the latest version of PlatformIO
+$ pip install -U platformio
+
+$ cd MIDIsync
+$ platformio run
+```
 
 [![Join the chat at https://gitter.im/gretel/MIDIsync](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gretel/MIDIsync?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
