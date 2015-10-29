@@ -24,7 +24,7 @@ Building and uploading can be done easily using [platformio](http://platformio.o
 
 Please edit `platformio.ini` first to reflect your serial port.
 
-```
+```shell
 $ pip install -U pip setuptools
 $ pip install -U platformio
 $ cd MIDIsync
