@@ -10,9 +10,6 @@
 [submodule "lib/Streaming"]
   path = lib/Streaming
   url = https://github.com/scottdky/Streaming.git
-[submodule "lib/digitalWriteFast"]
-  path = lib/digitalWriteFast
-  url = https://github.com/mpflaga/Arduino-digitalWriteFast.git
 [submodule "lib/StackArray"]
   path = lib/StackArray
   url = https://github.com/oogre/StackArray.git
@@ -22,3 +19,6 @@
 [submodule "lib/Fsm"]
   path = lib/Fsm
   url = https://github.com/jonblack/arduino-fsm
+[submodule "lib/digitalWriteFast"]
+	path = lib/digitalWriteFast
+	url = https://github.com/mpflaga/Arduino-digitalWriteFast.git
