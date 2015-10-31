@@ -8,7 +8,7 @@
 
 // id
 #define ID "HENSEL_CLOCK-01"
-#define VERSION 2810201501
+#define VERSION 3110201501
 #define DEBUG 0
 
 // "hardware abstraction layer" :)
@@ -61,8 +61,8 @@
 
 // includes
 #include <avr/eeprom.h>
-#include <avr/power.h>
-#include <avr/wdt.h>
+// #include <avr/power.h>
+// #include <avr/wdt.h>
 #include <Arduino.h>
 
 #if DEBUG
@@ -72,8 +72,6 @@
 #include "Average.h"
 // https://github.com/JChristensen/Button
 #include "Button.h"
-// https://github.com/mpflaga/Arduino-digitalWriteFast
-#include "digitalWriteFast.h"
 // https://github.com/jonblack/arduino-fsm
 #include "Fsm.h"
 // https://github.com/jgillick/arduino-LEDFader
@@ -189,10 +187,9 @@ void printDiag()
 
 void reset()
 {
-    // use watchdog timer for reset
-    wdt_disable();
-    wdt_enable(WDTO_15MS);
-    while (1) {}
+    // FIXME: implement
+    // while (1) {}
+    delay(500);
 }
 
 void alert()
@@ -222,11 +219,11 @@ void writeEprom()
 #if DEBUG
     debugSerial << "WRITE_EPROM" << endl;
 #endif
-    digitalWriteFast(BOARD_LED, HIGH);
+    digitalWrite(BOARD_LED, HIGH);
     // actually write
     eeprom_write_block((const void*)&config, (void*)0, sizeof(config));
     delay(50); // paranoia
-    digitalWriteFast(BOARD_LED, LOW);
+    digitalWrite(BOARD_LED, LOW);
 }
 
 void resetConfig()
@@ -368,20 +365,20 @@ void s_continue_enter()
 extern void __attribute__((noreturn))
 setup()
 {
-    // be paranoid in regards to latency
-    power_spi_disable();
-    power_twi_disable();
-    power_adc_disable();
+    // // be paranoid in regards to latency
+    // power_spi_disable();
+    // power_twi_disable();
+    // power_adc_disable();
 
     // begin of setup() - enable board LED
     pinMode(BOARD_LED, OUTPUT);
-    digitalWriteFast(BOARD_LED, HIGH);
+    digitalWrite(BOARD_LED, HIGH);
 
     // configure input/output pins
     pinMode(ENC_A, INPUT);
-    digitalWriteFast(ENC_A, HIGH);
+    digitalWrite(ENC_A, HIGH);
     pinMode(ENC_B, INPUT);
-    digitalWriteFast(ENC_B, HIGH);
+    digitalWrite(ENC_B, HIGH);
     pinMode(GATE_PIN, OUTPUT);
 
 #if DEBUG
@@ -434,7 +431,7 @@ setup()
     cpqn = config.cpqn;
     setCycle(config.cycle);
     // end of setup() - disable board led (oldschool diag)
-    digitalWriteFast(BOARD_LED, LOW);
+    digitalWrite(BOARD_LED, LOW);
     // recall saved state
     setState(config.state);
 }
@@ -480,7 +477,7 @@ loop()
                 if(++counter == 1)
                 {
                     // raise control voltage
-                    digitalWriteFast(GATE_PIN, LOW);
+                    digitalWrite(GATE_PIN, LOW);
                     // light tempo LEDs up
                     queueLight(ACT_PUSH, LED_LEFT_A, 240, 0);
                     queueLight(ACT_PUSH, LED_LEFT_B, 240, 0);
@@ -495,7 +492,7 @@ loop()
                 else if(counter == cpqn / 4)
                 {
                     // drop control voltage
-                    digitalWriteFast(GATE_PIN, HIGH);
+                    digitalWrite(GATE_PIN, HIGH);
                     // turn tempo LEDs off
                     queueLight(ACT_PUSH, LED_LEFT_A, 0, 50);
                     queueLight(ACT_PUSH, LED_LEFT_B, 0, 50);
