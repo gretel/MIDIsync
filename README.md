@@ -15,6 +15,7 @@ Libraries are included as *git submodules*. To clone the project and it's submod
 ```shell
 $ git clone https://github.com/gretel/MIDIsync.git
 $ cd MIDIsync
+$ git submodule init
 $ git submodule update
 ```
 
