@@ -8,7 +8,7 @@
 
 // id
 #define ID "HENSEL_CLOCK-01"
-#define VERSION 3110201501
+#define VERSION 0411201501
 #define DEBUG 0
 
 // "hardware abstraction layer" :)
@@ -71,10 +71,6 @@
 #endif
 #include "Average.h"
 #include "Button.h"
-<<<<<<< HEAD
-=======
-#include "digitalWriteFast.h"
->>>>>>> master
 #include "Fsm.h"
 #include "LEDFader.h"
 #include "Curve.h"
