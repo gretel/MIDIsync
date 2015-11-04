@@ -67,24 +67,16 @@
 
 #if DEBUG
 #include <SoftwareSerial.h>
+#include "Streaming.h"
 #endif
-// https://github.com/MajenkoLibraries/Average
 #include "Average.h"
-// https://github.com/JChristensen/Button
 #include "Button.h"
-// https://github.com/mpflaga/Arduino-digitalWriteFast
 #include "digitalWriteFast.h"
-// https://github.com/jonblack/arduino-fsm
 #include "Fsm.h"
-// https://github.com/jgillick/arduino-LEDFader
 #include "LEDFader.h"
 #include "Curve.h"
-// https://github.com/FortySevenEffects/arduino_midi_library
 #include "MIDI.h"
-// https://github.com/oogre/StackArray
 #include "StackArray.h"
-// http://arduiniana.org/libraries/streaming/
-#include "Streaming.h"
 
 // MIDI library settings
 struct MidiSettings : public midi::DefaultSettings
