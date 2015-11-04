@@ -8,7 +8,7 @@
 
 // id
 #define ID "HENSEL_CLOCK-01"
-#define VERSION 2810201501
+#define VERSION 0411201501
 #define DEBUG 0
 
 // "hardware abstraction layer" :)
