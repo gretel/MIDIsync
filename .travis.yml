@@ -3,6 +3,7 @@ python:
   - "2.7"
 sudo: false
 cache:
+  pip: true
   directories:
     - "~/.platformio"
 env:
