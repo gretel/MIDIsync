@@ -71,6 +71,10 @@
 #endif
 #include "Average.h"
 #include "Button.h"
+<<<<<<< HEAD
+=======
+#include "digitalWriteFast.h"
+>>>>>>> master
 #include "Fsm.h"
 #include "LEDFader.h"
 #include "Curve.h"
