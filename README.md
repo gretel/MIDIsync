@@ -3,15 +3,11 @@ Arduino "MIDIsync" MIDI and CV Master Clock
 ɔ 2012-2015 Tom Hensel <tom@jitter.eu> Hamburg, Germany
 CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
 
-Arduino Leonardo, Uno [![Build Status: Arduino Uno, Leonardo](https://travis-ci.org/gretel/MIDIsync.svg)](https://travis-ci.org/gretel/MIDIsync)
-Teensy 3.1 [![Build Status: Teensy 3.1](https://travis-ci.org/gretel/MIDIsync.svg?branch=teensy31)](https://travis-ci.org/gretel/MIDIsync)
-
 At least running on
-- [Arduino Duemilanove](http://arduino.cc/en/Main/arduinoBoardDuemilanove)
-- [Arduino Uno](http://arduino.cc/en/Main/arduinoBoardUno)
-- [Teensy 3.1](https://www.pjrc.com/store/teensy31.html) *work in progress!*
+- [Arduino Uno](http://arduino.cc/en/Main/arduinoBoardUno) [![Build Status: Arduino Uno, Leonardo](https://travis-ci.org/gretel/MIDIsync.svg)](https://travis-ci.org/gretel/MIDIsync)
+- [Teensy 3.1](https://www.pjrc.com/store/teensy31.html) [![Build Status: Teensy 3.1](https://travis-ci.org/gretel/MIDIsync.svg?branch=teensy31)](https://travis-ci.org/gretel/MIDIsync)
 
-Should be compatible with MIDI-Shield from [Sparkfun](https://www.sparkfun.com/products/9595).
+Should be compatible with the MIDI-Shield from [Sparkfun](https://www.sparkfun.com/products/9595).
 
 Libraries are included as *git submodules*. To clone the project and it's submodules please do:
 
