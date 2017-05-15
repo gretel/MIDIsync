@@ -1,7 +1,6 @@
 Arduino "MIDIsync" MIDI and CV Master Clock
 =
-ɔ 2012-2015 Tom Hensel <tom@jitter.eu> Hamburg, Germany
-CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/
+ɔ 2012-2017 Tom Hensel <tom@jitter.eu> Hamburg, Germany - License at https://opensource.org/licenses/BSD-3-Clause
 
 At least running on
 - [Arduino Uno](http://arduino.cc/en/Main/arduinoBoardUno) [![Build Status: Arduino Uno, Leonardo](https://travis-ci.org/gretel/MIDIsync.svg)](https://travis-ci.org/gretel/MIDIsync)
